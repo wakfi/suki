@@ -10,7 +10,7 @@ function cleanReply(message, input, duration)
 		if(typeof input === "undefined") input = "an unknown error occured";
 		if(typeof duration === "undefined") duration = "12s";
 		const errReply = await message.reply(input);
-		if(duration == 0 || message.channel.type === 'dm') resolve();
+		if(duration == 0 || message.channel.type === 'dm') {resolve(); return;}
 		await delay(duration);
 		await errReply.delete();
 		try {

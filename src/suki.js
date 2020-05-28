@@ -63,15 +63,15 @@ client.on("message", async message => {
 					
 	if(args.join(' ') === '-h') return client.commands.get('help').execute(message,args,commandName);
 	
+	if(command.guildOnly && message.channel.type !== 'text') return message.channel.send(`This command cannot be executed in DMs!`);
+	
+	if(command.dmOnly && message.channel.type !== 'dm') return cleanReply(message, `This command can only be executed in DMs!`);
+	
 	if(!((args.length==0) ^ command.args)) 
 	{
 		let reply = `Invalid command syntax. Try sending me \`${prefix}${command.name} -h\` for help with this command`;
 		return cleanReply(message, reply, '20s');
 	}
-	
-	if(command.guildOnly && message.channel.type !== 'text') return cleanReply(message, `This command cannot be executed in DMs!`);
-	
-	if(command.dmOnly && message.channel.type !== 'dm') return cleanReply(message, `This command can only be executed in DMs!`);
 	
 	const level = permlevel(message);
 	if(level < levelCache[command.permLevel]) return cleanReply(message, `You don't have permission to use this command`);
