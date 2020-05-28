@@ -2,8 +2,11 @@ function main(){
 const Discord = require('discord.js');
 const fs = require('fs-extra');
 
-const { prefix, token, clientOptions, activity, clientStatus } = require('./components/config.json');
+const { prefix, token, clientOptions, activity, clientStatus, permLevels } = require('./components/config.js');
+
 const addTimestampLogs = require('./util/addTimestampLogs.js');
+const cleanReply = require('./util/cleanReply.js');
+const authorReply = require('./util/authorReply.js');
 
 const client = new Discord.Client(clientOptions);
 client.commands = new Discord.Collection();
@@ -13,6 +16,29 @@ const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('
 for (const file of commandFiles) {
 	const command = require(`./commands/${file}`);
 	client.commands.set(command.name, command);
+}
+
+const levelCache = {};
+for (let i = 0; i < permLevels.length; i++) 
+{
+	const thisLevel = permLevels[i];
+	levelCache[thisLevel.name] = thisLevel.level;
+}
+
+const permlevel = (message) => {
+	let permlvl = 0;
+
+	const permOrder = permLevels.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
+
+	while (permOrder.length) {
+		const currentLevel = permOrder.shift();
+		if (message.guild && currentLevel.guildOnly) continue;
+		if (currentLevel.check(message)) {
+			permlvl = currentLevel.level;
+			break;
+		}
+	}
+	return permlvl;
 }
 
 client.once("ready", async () => {
@@ -30,15 +56,31 @@ client.on("message", async message => {
 	const args = message.content.slice(prefix.length).split(/ +/g);
 	const commandName = args.shift();
 	
-	if(!client.commands.has(commandName)) return;
+	const command = client.commands.get(commandName) || 
+					client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+					
+	if(!command) return;
+					
+	if(args.join(' ') === '-h') return client.commands.get('help').execute(message,args,commandName);
 	
-	const command = client.commands.get(commandName);
+	if(!((args.length==0) ^ command.args)) 
+	{
+		let reply = `Invalid command syntax. Try sending me \`${prefix}${command.name} -h\` for help with this command`;
+		return cleanReply(message, reply, '20s');
+	}
+	
+	if(command.guildOnly && message.channel.type !== 'text') return cleanReply(message, `This command cannot be executed in DMs!`);
+	
+	if(command.dmOnly && message.channel.type !== 'dm') return cleanReply(message, `This command can only be executed in DMs!`);
+	
+	const level = permlevel(message);
+	if(level < levelCache[command.permLevel]) return cleanReply(message, `You don't have permission to use this command`);
 	
 	try {
 		command.execute(message, args);
 	} catch(e) {
 		console.error(e);
-		message.reply('there was an error trying to execute that command!');
+		cleanReply(message, `There was an error trying to execute that command!`);
 	}
 });
 
