@@ -1,0 +1,23 @@
+{
+  "name": "suki",
+  "version": "0.1.0",
+  "description": "Custom Discord bot",
+  "main": "src/suki.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wakfi/suki.git"
+  },
+  "author": "wakfi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wakfi/suki/issues"
+  },
+  "homepage": "https://github.com/wakfi/suki#readme",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "fs-extra": "^9.0.0"
+  }
+}
