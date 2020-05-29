@@ -1,4 +1,5 @@
-const Message = require((require.resolve('discord.js')).split('\\').slice(0, -1).join('\\') + '\\structures\\Message.js');
+const path = require('path');
+const Message = require((require.resolve('discord.js')).split(path.sep).slice(0, -1).join(path.sep) + `${path.sep}structures${path.sep}Message.js`);
 const delay = require('./delay.js');
 
 function cleanReply(message, input, duration)
