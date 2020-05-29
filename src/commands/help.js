@@ -29,8 +29,8 @@ const permlevel = (message) => {
 module.exports = {
 	name: 'help',
 	description: 'Provides information about all commands, as well as information about specific commands',
-	category: 'basic',
-	usage: `[commandName]\n${prefix}<command> -h`,
+	category: 'general',
+	usage: [`[commandName]\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b ${prefix}<command> -h`],
 	aliases: ['commands','command','?'],
 	permLevel: 'User',
 	guildOnly: false,
@@ -42,12 +42,12 @@ module.exports = {
 		const commands = message.client.commands.sorted((p, c) => levelCache[p.permLevel] < levelCache[c.permLevel] ? -1 : 1);
 		if(args.length == 0)
 		{
+			// ?help
 			const embeds = [];
 			embeds[0] = new MessageEmbed()
-				.setTitle(`Suki Help`)
-				.setAuthor(message.client.user.username, message.client.user.avatarURL)
-				.setDescription(`Please contact <@193160566334947340> with additional questions`)
-				.setColor(0xFF00FF)
+				.setTitle(`${message.client.user.username} Help`)//, message.client.user.displayAvatarURL())
+				.setDescription(`Send \`${prefix}command -h\` with any command for more information about that command`)
+				.setColor(0xFF00FF);
 			let previousCMDLevel = levelCache[commands.first().permLevel];
 			let cmdArr = [[]];
 			let count = 0;
@@ -99,24 +99,13 @@ module.exports = {
 							count++;
 						}
 						checkCount();
-						/*if(count == 25) 
-						{
-							cmdIndex++;
-							if(cmdIndex == embeds.length)
-							{
-								embeds.push(new MessageEmbed()
-									.setColor(0xFF00FF);
-								);
-								count = 0;
-							}
-						}*/
 						let fieldBody = ``;
-						if(cmd.description) fieldBody += `Description: ${cmd.description}\n`;
-						fieldBody += `Usage: ${prefix}${cmd.name} ${cmd.usage?cmd.usage:''}\n`;
-						if(cmd.category) fieldBody += `Category: ${cmd.category}\n`;
-						if(cmd.aliases) fieldBody += `Aliases: ${cmd.aliases.join(', ')}\n`;
-						if(cmd.guildOnly) fieldBody += `*This command can only be used in a server channel*\n`;
-						if(cmd.dmOnly) fieldBody += `*This command can only be used in a direct message*\n`;
+						//if(cmd.aliases) fieldBody += `Alias(es): ${cmd.aliases.join(', ')}\n`;
+						fieldBody += `Description: ${cmd.description}\n`;
+						//fieldBody += `Usage: ${prefix}${cmd.name} ${cmd.usage?cmd.usage.join('\\n       ' + prefix + cmd.name):''}\n`;
+						//if(cmd.category) fieldBody += `Category: ${cmd.category}\n`;
+						//if(cmd.guildOnly) fieldBody += `*This command can only be used in a server channel*\n`;
+						//if(cmd.dmOnly) fieldBody += `*This command can only be used in a direct message*\n`;
 						embed.addField(`${prefix}${cmd.name}`,fieldBody.trim());
 						count++;
 						checkCount();
@@ -130,8 +119,24 @@ module.exports = {
 				.setTimestamp(new Date());
 			embedsToSend.forEach(async embed => await authorReply(message,embed));
 		} else {
+			// ?command -h
 			const commandName = args.shift();
-			
+			if(!message.client.commands.has(commandName)) return;
+			const command = message.client.commands.get(commandName);
+			let fieldBody = ``;
+			if(command.aliases) fieldBody += `Alias(es): ${command.aliases.join(', ')}\n`;
+			fieldBody += `Description: ${command.description ? command.description : command.name.charAt(0).toUpperCase() + command.name.slice(1)}\n`;
+			fieldBody += `Usage: ${prefix}${command.name} ${command.usage ? command.usage.join('\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b ' + prefix + command.name + ' ') : ''}\n`;
+			if(command.category) fieldBody += `Category: ${command.category}\n`;
+			if(command.guildOnly) fieldBody += `*This command can only be used in a server channel*\n`;
+			else if(command.dmOnly) fieldBody += `*This command can only be used in a direct message*\n`;
+			const embed = new MessageEmbed()
+				.setTitle(`${prefix}${command.name}`)
+				.setColor(0xFF00FF)
+				.addField(`${command.permLevel==='User' ? 'Available to all users' : 'Restricted to: ' + command.permLevel}`, fieldBody.trim())
+				.setFooter(`\`<arg>\` denotes required arguments; \`[arg]\` denotes optional arguments`)
+				.setTimestamp(new Date());
+			authorReply(message, embed);
 		}
 	}
 };

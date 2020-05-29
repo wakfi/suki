@@ -4,7 +4,7 @@ module.exports = {
 	name: 'purge',
 	description: 'Bulk deletes a specific amount of recent messages',
 	category: 'moderation',
-	usage: '<number of messages>\ncount | <number of messages>\nfrom | <messageID>\nbetween | <olderMessageID> | <newerMessageID>',
+	usage: ['<number of messages>', 'count | <number of messages>', 'from | <messageID>', 'between | <olderMessageID> | <newerMessageID>'],
 	aliases: null,
 	permLevel: 'Moderator',
 	guildOnly: true,

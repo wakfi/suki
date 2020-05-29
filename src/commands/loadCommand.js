@@ -2,7 +2,7 @@ module.exports = {
 	name: 'loadCommand',
 	description: 'Load a new command that is not currently cached into the available commands',
 	category: 'development',
-	usage: '<commandName>',
+	usage: ['<commandName>'],
 	aliases: ['ldc'],
 	permLevel: 'Bot Developer',
 	guildOnly: false,

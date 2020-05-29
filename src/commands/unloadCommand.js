@@ -2,7 +2,7 @@ module.exports = {
 	name: 'unloadCommand',
 	description: 'Remove a command from the currently available commands',
 	category: 'development',
-	usage: '<commandName>',
+	usage: ['<commandName>'],
 	aliases: ['ulc'],
 	permLevel: 'Bot Developer',
 	guildOnly: false,

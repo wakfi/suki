@@ -2,7 +2,7 @@ module.exports = {
 	name: 'reloadCommand',
 	description: 'Reload a command that is currently cached in the available commands',
 	category: 'development',
-	usage: '<commandName>',
+	usage: ['<commandName>'],
 	aliases: ['rlc'],
 	permLevel: 'Bot Developer',
 	guildOnly: false,
