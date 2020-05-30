@@ -17,7 +17,6 @@ module.exports = {
 			const embed = new MessageEmbed()
 				.setTitle(`Suki`)
 				.setThumbnail(message.client.user.displayAvatarURL())
-				.setAuthor(`wakfi`, `https://cdn.discordapp.com/attachments/433771480505909248/698752752574005308/wakfi.png`)
 				.setDescription(`This bot was created by <@193160566334947340> for the Clue Crew Server`)
 				.addField(`Prefix`,`Use ${prefix} or ${message.client.user} to invoke commands`)
 				.addField(`Help commands`,`${prefix}help, ${prefix}commands, ${prefix}command, ${prefix}?`)
