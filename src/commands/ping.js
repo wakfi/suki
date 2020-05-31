@@ -1,7 +1,7 @@
 module.exports = {
 	name: 'ping',
 	description: 'Ping! Provides information about the bot\'s current connection latency',
-	category: 'basic',
+	category: 'general',
 	permLevel: 'User',
 	guildOnly: false,
 	dmOnly: false,
