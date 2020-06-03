@@ -1,9 +1,9 @@
 const path = require('path');
 const MessageEmbed = require((require.resolve('discord.js')).split(path.sep).slice(0, -1).join(path.sep) + `${path.sep}structures${path.sep}MessageEmbed.js`);
-const cleanReply = require('../util/cleanReply.js');
-const selfDeleteReply = require('../util/selfDeleteReply.js');
-const millisecondsToString = require('../util/millisecondsToString.js');
-const printTimePretty = require('../util/printTimePretty.js');
+const cleanReply = require(`${process.cwd()}/util/cleanReply.js`);
+const selfDeleteReply = require(`${process.cwd()}/util/selfDeleteReply.js`);
+const millisecondsToString = require(`${process.cwd()}/util/millisecondsToString.js`);
+const printTimePretty = require(`${process.cwd()}/util/printTimePretty.js`);
 const USERS_PATTERN = /<@!?(\d{17,18})>/i
 const DISCORD_EPOCH = 1420070400000 //unix of first second of 2015
 
