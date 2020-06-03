@@ -3,7 +3,9 @@ const Discord = require('discord.js');
 const fs = require('fs-extra');
 const USERS_PATTERN = /<@!?\d{17,18}>/i
 
-const { prefix, token, clientOptions, activity, clientStatus, permLevels } = require('./components/config.js');
+const { prefix, clientOptions, activity, clientStatus} = require('./components/config.json');
+const { token } = require('./components/token.json');
+const permLevels = require('./components/permLevels.js');
 
 const addTimestampLogs = require('./util/addTimestampLogs.js');
 const cleanReply = require('./util/cleanReply.js');

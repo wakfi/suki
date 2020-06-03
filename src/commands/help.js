@@ -1,7 +1,8 @@
 const path = require('path');
 const MessageEmbed = require((require.resolve('discord.js')).split(path.sep).slice(0, -1).join(path.sep) + `${path.sep}structures${path.sep}MessageEmbed.js`);
 const authorReply = require('../util/authorReply.js');
-const {prefix,permLevels} = require('../components/config.js');
+const {prefix} = require('../components/config.json');
+const permLevels = require('../components/permLevels.js');
 
 const levelCache = {};
 for (let i = 0; i < permLevels.length; i++) 
