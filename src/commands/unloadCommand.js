@@ -18,10 +18,10 @@ module.exports = {
 				message.client.commands.sweep(cmd => cmd.name === command.name);
 				message.reply(`Successfully unloaded ${command.name}`);
 			} catch (e) {
-				console.error(e);
+				console.error(e.stack);
 				message.channel.send(`There was an error while unloading a command \`${command.name}\`:\n\`${e.message}\``);
 			}
-		} catch(e) {
+		} catch(er) {
 			message.channel.send(`There is currently no command with name or alias \`${commandName}\` loaded`);
 		}
 	}
