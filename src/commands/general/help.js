@@ -31,7 +31,7 @@ module.exports = {
 	name: 'help',
 	description: 'Provides information about all commands, as well as information about specific commands',
 	category: 'general',
-	usage: [`[commandName]\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b ${prefix}<command> -h`],
+	usage: [`[commandName]\`\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \`${prefix}<command> -h`],
 	aliases: ['commands','command','?'],
 	permLevel: 'User',
 	async execute(message, args) {
@@ -123,7 +123,7 @@ module.exports = {
 			let fieldBody = ``;
 			if(command.aliases) fieldBody += `Alias(es): ${command.aliases.join(', ')}\n`;
 			fieldBody += `Description: ${command.description ? command.description : command.name.charAt(0).toUpperCase() + command.name.slice(1)}\n`;
-			fieldBody += `Usage: ${prefix}${command.name} ${command.usage ? command.usage.join('\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b ' + prefix + command.name + ' ') : ''}\n`;
+			fieldBody += `Usage: \`${prefix}${command.name} ${command.usage ? command.usage.join('`\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b `' + prefix + command.name + ' ') : ''}\`\n`;
 			if(command.category) fieldBody += `Category: ${command.category}\n`;
 			if(command.guildOnly) fieldBody += `*This command can only be used in a server channel*\n`;
 			else if(command.dmOnly) fieldBody += `*This command can only be used in a direct message*\n`;
