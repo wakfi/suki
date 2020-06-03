@@ -1,5 +1,6 @@
 config.js*
 command.js
+token.json
 
 # Logs
 logs

@@ -1,7 +1,9 @@
 const path = require('path');
 const MessageEmbed = require((require.resolve('discord.js')).split(path.sep).slice(0, -1).join(path.sep) + `${path.sep}structures${path.sep}MessageEmbed.js`);
-const authorReply = require('../util/authorReply.js');
-const {prefix,permLevels} = require('../components/config.js');
+const authorReply = require(`${process.cwd()}/util/authorReply.js`);
+const {prefix} = require(`${process.cwd()}/components/config.json`);
+const permLevels = require(`${process.cwd()}/components/permLevels.js`);
+const EMBED_MAX_FIELDS = 25;
 
 const levelCache = {};
 for (let i = 0; i < permLevels.length; i++) 
@@ -29,62 +31,71 @@ const permlevel = (message) => {
 module.exports = {
 	name: 'help',
 	description: 'Provides information about all commands, as well as information about specific commands',
-	category: 'information',
-	usage: [`[commandName]\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b ${prefix}<command> -h`],
+	category: 'general',
+	usage: [`[-a|commandName]\`\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \`${prefix}<command> -h`],
 	aliases: ['commands','command','?'],
 	permLevel: 'User',
 	async execute(message, args) {
 		const level = permlevel(message);
-		const commands = message.client.commands.sorted((p, c) => levelCache[p.permLevel] < levelCache[c.permLevel] ? -1 : 1);
+		const includeAll = (() =>
+		{
+			if(args.length == 0) return false;
+			if(args[0] === '-a'){args.shift(); return true;}
+			return false;
+		})();
+		const commands = message.client.commands.filter(cmd => includeAll || !cmd.unlisted).sorted((p, c) => levelCache[p.permLevel] - levelCache[c.permLevel] || (p.name < c.name ? -1 : 1));
 		if(args.length == 0)
 		{
 			// ?help
 			const embeds = [];
 			embeds[0] = new MessageEmbed()
+				.setThumbnail(`https://i.imgur.com/0NR5nbD.png`)
 				.setTitle(`${message.client.user.username} Help`)//, message.client.user.displayAvatarURL())
 				.setDescription(`Send \`${prefix}command -h\` with any command for more information about that command`)
 				.setColor(0xFF00FF);
 			let previousCMDLevel = levelCache[commands.first().permLevel];
 			let cmdArr = [[]];
-			let count = 0;
+			let numberOfFields = 0;
 			let cmdIndex = 0;
 			commands.forEach(cmd => 
 			{
 				cmdArr[cmdIndex].push(cmd);
-				count++;
-				if(count == 25)
+				numberOfFields++;
+				if(numberOfFields == EMBED_MAX_FIELDS)
 				{
 					cmdArr.push([]);
 					cmdIndex++;
-					count = 0;
+					numberOfFields = 0;
 					embeds[cmdIndex] = new MessageEmbed()
 						.setColor(0xFF00FF);
 				}
 			});
 			
 			let modified = false;
+			let extraFields = 0;
 			cmdIndex = 0;
-			count = 0;
+			numberOfFields = 0;
 			const checkCount = () => {
-				if(count == 25) 
+				if(numberOfFields == EMBED_MAX_FIELDS) 
 				{
 					cmdIndex++;
 					if(cmdIndex == embeds.length)
 					{
 						embeds.push(new MessageEmbed()
+							.setThumbnail(`https://i.imgur.com/0NR5nbD.png`)
 							.setColor(0xFF00FF)
 						);
-						count = 0;
 					}
+					if(extraFields)
+					{
+						extraFields = false;
+					}
+					numberOfFields = 0;
 				}
 			};
 			cmdArr.forEach(subArr => {
-				if(modified) 
-				{
-					cmdIndex--;
-				}
-				const embed = embeds[cmdIndex];
 				subArr.forEach(cmd => {
+					const embed = embeds[cmdIndex];
 					cmdLevel = levelCache[cmd.permLevel];
 					if(level >= cmdLevel)
 					{
@@ -92,37 +103,36 @@ module.exports = {
 						{
 							embed.addField(`\u200b`, `**Additional commands for: ${cmd.permLevel}**`);
 							previousCMDLevel = cmdLevel;
-							count++;
+							extraFields = true;
+							numberOfFields++;
 						}
 						checkCount();
 						let fieldBody = ``;
-						//if(cmd.aliases) fieldBody += `Alias(es): ${cmd.aliases.join(', ')}\n`;
-						fieldBody += `Description: ${cmd.description}\n`;
-						//fieldBody += `Usage: ${prefix}${cmd.name} ${cmd.usage?cmd.usage.join('\\n       ' + prefix + cmd.name):''}\n`;
-						//if(cmd.category) fieldBody += `Category: ${cmd.category}\n`;
-						//if(cmd.guildOnly) fieldBody += `*This command can only be used in a server channel*\n`;
-						//if(cmd.dmOnly) fieldBody += `*This command can only be used in a direct message*\n`;
+						fieldBody += `Description: ${cmd.description?cmd.description:'No Description'}\n`;
 						embed.addField(`${prefix}${cmd.name}`,fieldBody.trim());
-						count++;
+						numberOfFields++;
 						checkCount();
 					}
 				});
-				cmdIndex++;
 			});
 			const embedsToSend = embeds.filter(embed => embed.fields.length > 0);
 			embedsToSend[embedsToSend.length-1]
-				.setFooter(`${prefix}commands, ${prefix}command, ${prefix}?`)
+				.setFooter(`${prefix}help, ${prefix}commands, ${prefix}command, ${prefix}?`)
 				.setTimestamp(new Date());
 			embedsToSend.forEach(async embed => await authorReply(message,embed));
 		} else {
-			// ?command -h
+			// ?command -h, ?help <command>
 			const commandName = args.shift();
-			if(!message.client.commands.has(commandName)) return;
-			const command = message.client.commands.get(commandName);
+			if(!message.client.commands.has(commandName) &&
+			   !message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))) return;
+			const command = message.client.commands.get(commandName)  ||
+							message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+			if(level < levelCache[command.permLevel]) return;
 			let fieldBody = ``;
+			if(command.unlisted) fieldBody += `*Unlisted*\n`;
 			if(command.aliases) fieldBody += `Alias(es): ${command.aliases.join(', ')}\n`;
 			fieldBody += `Description: ${command.description ? command.description : command.name.charAt(0).toUpperCase() + command.name.slice(1)}\n`;
-			fieldBody += `Usage: ${prefix}${command.name} ${command.usage ? command.usage.join('\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b ' + prefix + command.name + ' ') : ''}\n`;
+			fieldBody += `Usage: \`${prefix}${command.name}${command.usage ? ' ' + command.usage.join('`\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b `' + prefix + command.name + ' ') : ''}\`\n`;
 			if(command.category) fieldBody += `Category: ${command.category}\n`;
 			if(command.guildOnly) fieldBody += `*This command can only be used in a server channel*\n`;
 			else if(command.dmOnly) fieldBody += `*This command can only be used in a direct message*\n`;

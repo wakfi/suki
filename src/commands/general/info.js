@@ -1,13 +1,13 @@
 const got = require('got');
 const path = require('path');
 const MessageEmbed = require((require.resolve('discord.js')).split(path.sep).slice(0, -1).join(path.sep) + `${path.sep}structures${path.sep}MessageEmbed.js`);
-const authorReply = require('../util/authorReply.js');
-const { prefix } = require('../components/config.js');
+const authorReply = require(`${process.cwd()}/util/authorReply.js`);
+const { prefix } = require(`${process.cwd()}/components/config.json`);
 
 module.exports = {
 	name: 'info',
 	description: 'Information about the bot and its development',
-	category: 'information',
+	category: 'general',
 	permLevel: 'User',
 	noArgs: true,
 	async execute(message, args) {

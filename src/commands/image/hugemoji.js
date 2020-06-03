@@ -28,13 +28,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-const emojiMap = require('../components/emojilib.json');
+const emojiMap = require(`${process.cwd()}/components/emojilib.json`);
 
 module.exports = {
 	name: 'hugemoji',
 	description: 'create a real big version of an emoji',
 	category: 'image',
-	usage: '<emoji>',
+	usage: ['<emoji>'],
 	permLevel: 'User',
 	args: true,
 	async execute(message, args) {

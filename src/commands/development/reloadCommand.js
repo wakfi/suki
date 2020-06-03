@@ -15,8 +15,9 @@ module.exports = {
 							message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 			const cn = command.name;
 			try {
-				delete require.cache[require.resolve(`./${command.name}.js`)];
-				const newCommand = require(`./${command.name}.js`);
+				const commandPath = `${process.cwd()}/commands/${command.category}/${command.name}.js`;
+				delete require.cache[require.resolve(commandPath)];
+				const newCommand = require(commandPath);
 				message.client.commands.set(newCommand.name, newCommand);
 				message.reply(`Reloaded \`${command.name}\` successfully`);
 			} catch (e) {

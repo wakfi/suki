@@ -1,23 +1,22 @@
 function main(){
 const Discord = require('discord.js');
 const fs = require('fs-extra');
+const path = require('path');
 const USERS_PATTERN = /<@!?\d{17,18}>/i
 
-const { prefix, token, clientOptions, activity, clientStatus, permLevels } = require('./components/config.js');
+const { prefix, clientOptions, activity, clientStatus} = require('./components/config.json');
+const { token } = require('./components/token.json');
+const permLevels = require('./components/permLevels.js');
 
 const addTimestampLogs = require('./util/addTimestampLogs.js');
 const cleanReply = require('./util/cleanReply.js');
 const authorReply = require('./util/authorReply.js');
+const loadAllCommands = require('./util/loadAllCommands.js');
 
 const client = new Discord.Client(clientOptions);
 client.commands = new Discord.Collection();
-
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
-for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-	client.commands.set(command.name, command);
-}
+loadAllCommands(client, `${process.cwd()}/commands`);
+client.commands.delete(null);
 
 const levelCache = {};
 for (let i = 0; i < permLevels.length; i++) 
@@ -68,7 +67,7 @@ client.on("message", async message => {
 					
 	if(!command) return;
 		
-	if(args.join(' ') === '-h') return client.commands.get('help').execute(message,[commandName]);
+	if(args.join(' ') === '-h') return client.commands.get('help').execute(message,[command.name]);
 	
 	if(command.guildOnly && message.channel.type !== 'text') return message.channel.send(`This command cannot be executed in DMs!`);
 	

@@ -14,7 +14,8 @@ module.exports = {
 			const command = message.client.commands.get(commandName) ||
 							message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 			try {
-				delete require.cache[require.resolve(`./${command.name}.js`)];
+				const commandPath = `${process.cwd()}/commands/${command.category}/${command.name}.js`;
+				delete require.cache[require.resolve(commandPath)];
 				message.client.commands.sweep(cmd => cmd.name === command.name);
 				message.reply(`Successfully unloaded \`${command.name}\``);
 			} catch (e) {
