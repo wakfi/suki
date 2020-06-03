@@ -20,6 +20,7 @@ module.exports = {
 		try	{
 			const manager = message.client.users;
 			user = await manager.fetch(manager.resolveID(toResolve));
+			const uid = user.id;
 		} catch(e) {
 			return selfDeleteReply(message, `could not resolve "${joinArgs}" to a user`);
 		}
