@@ -30,13 +30,13 @@ const permlevel = (message) => {
 module.exports = {
 	name: 'help',
 	description: 'Provides information about all commands, as well as information about specific commands',
-	category: 'information',
+	category: 'general',
 	usage: [`[commandName]\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b ${prefix}<command> -h`],
 	aliases: ['commands','command','?'],
 	permLevel: 'User',
 	async execute(message, args) {
 		const level = permlevel(message);
-		const commands = message.client.commands.sorted((p, c) => levelCache[p.permLevel] < levelCache[c.permLevel] ? -1 : 1);
+		const commands = message.client.commands.sorted((p, c) => levelCache[p.permLevel] - levelCache[c.permLevel] || (p.name < c.name ? -1 : 1));
 		if(args.length == 0)
 		{
 			// ?help

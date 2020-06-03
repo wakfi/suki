@@ -1,7 +1,7 @@
 module.exports = {
 	name: 'kill',
 	description: 'Emergency Kill switch to restart the bot and log an error',
-	category: 'bot management',
+	category: 'development',
 	permLevel: 'Moderator',
 	noArgs: true,
 	async execute(message, args) {

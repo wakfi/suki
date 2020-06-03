@@ -7,7 +7,7 @@ const { prefix } = require(`${process.cwd()}/components/config.json`);
 module.exports = {
 	name: 'info',
 	description: 'Information about the bot and its development',
-	category: 'information',
+	category: 'general',
 	permLevel: 'User',
 	noArgs: true,
 	async execute(message, args) {

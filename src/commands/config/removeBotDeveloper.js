@@ -10,7 +10,7 @@ module.exports = {
 	description: 'Remove a user from the list of Bot Developers',
 	category: 'config',
 	usage: ['<UserResolvable>'],
-	permLevel: 'Owner',
+	permLevel: 'Bot Owner',
 	guildOnly: true,
 	args: true,
 	async execute(message, args) {

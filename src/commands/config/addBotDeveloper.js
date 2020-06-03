@@ -10,7 +10,7 @@ module.exports = {
 	description: 'Add a user to the list of Bot Developers',
 	category: 'config',
 	usage: ['<UserResolvable>'],
-	permLevel: 'Owner',
+	permLevel: 'Bot Owner',
 	guildOnly: true,
 	args: true,
 	async execute(message, args) {

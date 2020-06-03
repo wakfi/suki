@@ -11,7 +11,8 @@ module.exports = {
 	async execute(message, args) {
 		const commandName = args.shift();
 		try {
-			const command = require(`./${commandName}.js`);
+			const commandPath = `${process.cwd()}/commands/${command.category}/${command.name}.js`;
+			const command = require(commandPath);
 			message.client.commands.set(command.name, command);
 			message.reply(`Loaded \`${command.name}\` successfully`);
 		} catch (e) {
