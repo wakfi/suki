@@ -18,6 +18,7 @@
   "homepage": "https://github.com/wakfi/suki#readme",
   "dependencies": {
     "discord.js": "^12.2.0",
-    "fs-extra": "^9.0.0"
+    "fs-extra": "^9.0.0",
+    "got": "^11.1.4"
   }
 }

@@ -1,6 +1,7 @@
 function main(){
 const Discord = require('discord.js');
 const fs = require('fs-extra');
+const USERS_PATTERN = /<@!?\d{17,18}>/i
 
 const { prefix, token, clientOptions, activity, clientStatus, permLevels } = require('./components/config.js');
 
@@ -50,28 +51,34 @@ client.once("ready", async () => {
 
 //this event triggers when a message is sent in a channel the bot has access to
 client.on("message", async message => {
-	if(!message.content.startsWith(prefix)) return;
+	if(!message.content.startsWith(prefix) && !message.mentions.has(client.user)) return;
+	
 	if(message.author.bot) return; 
-
+	
 	const args = message.content.slice(prefix.length).split(/ +/g);
+	if(USERS_PATTERN.test(message.content) && message.content.startsWith(`${message.client.user}`))
+	{
+		args.shift(); //clear mention
+		if(args.length == 0) return cleanReply(message, `type \`${prefix}help\` to see a list commands`, `15s`);
+	}
 	const commandName = args.shift();
 	
 	const command = client.commands.get(commandName) || 
 					client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 					
 	if(!command) return;
-					
-	if(args.join(' ') === '-h') return client.commands.get('help').execute(message,args,commandName);
+		
+	if(args.join(' ') === '-h') return client.commands.get('help').execute(message,[commandName]);
 	
-	if(!((args.length==0) ^ command.args)) 
+	if(command.guildOnly && message.channel.type !== 'text') return message.channel.send(`This command cannot be executed in DMs!`);
+	
+	if(command.dmOnly && message.channel.type !== 'dm') return cleanReply(message, `This command can only be executed in DMs!`);
+	
+	if((args.length==0 && command.args) || (args.length > 0 && command.noArgs))
 	{
 		let reply = `Invalid command syntax. Try sending me \`${prefix}${command.name} -h\` for help with this command`;
 		return cleanReply(message, reply, '20s');
 	}
-	
-	if(command.guildOnly && message.channel.type !== 'text') return cleanReply(message, `This command cannot be executed in DMs!`);
-	
-	if(command.dmOnly && message.channel.type !== 'dm') return cleanReply(message, `This command can only be executed in DMs!`);
 	
 	const level = permlevel(message);
 	if(level < levelCache[command.permLevel]) return cleanReply(message, `You don't have permission to use this command`);

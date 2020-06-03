@@ -1,4 +1,5 @@
-const Message = require((require.resolve('discord.js')).split('\\').slice(0, -1).join('\\') + '\\structures\\Message.js');
+const path = require('path');
+const Message = require((require.resolve('discord.js')).split(path.sep).slice(0, -1).join(path.sep) + `${path.sep}structures${path.sep}Message.js`);
 const delay = require('./delay.js');
 
 function cleanReply(message, input, duration)
@@ -10,7 +11,7 @@ function cleanReply(message, input, duration)
 		if(typeof input === "undefined") input = "an unknown error occured";
 		if(typeof duration === "undefined") duration = "12s";
 		const errReply = await message.reply(input);
-		if(duration == 0 || message.channel.type === 'dm') resolve();
+		if(duration == 0 || message.channel.type === 'dm') {resolve(); return;}
 		await delay(duration);
 		await errReply.delete();
 		try {
