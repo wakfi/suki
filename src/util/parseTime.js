@@ -1,3 +1,4 @@
+const isTimeFormat = require('./isTimeFormat.js');
 
 /*
 
@@ -19,18 +20,18 @@ function parseTime(timeToParse)
 	if(isNaN(timeToParse))
 	{
 		const timeString = timeToParse;
-		if(/[^ymwdhms](?<=m)s?/.test(timeString))
+		if(!isTimeFormat(timeString))
 		{
-			timeValue = timeToParse;
+			throw new SyntaxError('must be in the format 1d 2h 3m 4s 5ms (any segment is optional, such as `1h 1m` is valid)');
 		} else {
 			let match = null;
-			const yearReg = /(\d+)y/gi;
-			const weekReg = /(\d+)w/gi;
-			const dayReg = /(\d+)d/gi;
-			const hourReg = /(\d+)h/gi;
-			const minReg = /(\d+)m(?!s)/gi;
-			const secReg = /(\d+)s/gi;
-			const msReg = /(\d+)ms/gi;
+			const yearReg = /(-?(?:\d+|0b[01]+|0o[0-7]+|\d+(?:\.\d+)?e-?\d+|0x[\dabcedf]+))y/gi;
+			const weekReg = /(-?(?:\d+|0b[01]+|0o[0-7]+|\d+(?:\.\d+)?e-?\d+|0x[\dabcedf]+))w/gi;
+			const dayReg = /(-?(?:\d+|0b[01]+|0o[0-7]+|\d+(?:\.\d+)?e-?\d+|0x[\dabcedf]+))d/gi;
+			const hourReg = /(-?(?:\d+|0b[01]+|0o[0-7]+|\d+(?:\.\d+)?e-?\d+|0x[\dabcedf]+))h/gi;
+			const minReg = /(-?(?:\d+|0b[01]+|0o[0-7]+|\d+(?:\.\d+)?e-?\d+|0x[\dabcedf]+))m(?!s)/gi;
+			const secReg = /(-?(?:\d+|0b[01]+|0o[0-7]+|\d+(?:\.\d+)?e-?\d+|0x[\dabcedf]+))s/gi;
+			const msReg = /(-?(?:\d+|0b[01]+|0o[0-7]+|\d+(?:\.\d+)?e-?\d+|0x[\dabcedf]+))ms/gi;
 			let years = 0;
 			let weeks = 0;
 			let days = 0;
@@ -41,43 +42,43 @@ function parseTime(timeToParse)
 			match = yearReg.exec(timeString);
 			if(match !== null)
 			{
-				years = +match[1];
+				years = Number(match[1]);
 			}
 			match = null;
 			match = weekReg.exec(timeString);
 			if(match !== null)
 			{
-				weeks = +match[1];
+				weeks = Number(match[1]);
 			}
 			match = null;
 			match = dayReg.exec(timeString);
 			if(match !== null)
 			{
-				days = +match[1];
+				days = Number(match[1]);
 			}
 			match = null;
 			match = hourReg.exec(timeString);
 			if(match !== null)
 			{
-				hours = +match[1];
+				hours = Number(match[1]);
 			}
 			match = null;
 			match = minReg.exec(timeString);
 			if(match !== null)
 			{
-				minutes = +match[1];
+				minutes = Number(match[1]);
 			}
 			match = null;
 			match = secReg.exec(timeString);
 			if(match !== null)
 			{
-				seconds = +match[1];
+				seconds = Number(match[1]);
 			}
 			match = null;
 			match = msReg.exec(timeString);
 			if(match !== null)
 			{
-				milliseconds = +match[1];
+				milliseconds = Number(match[1]);
 			}
 			days += 365*years;
 			days += 7*weeks;
