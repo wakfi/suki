@@ -13,7 +13,7 @@ module.exports = {
 		try {
 			const command = require(`./${commandName}.js`);
 			message.client.commands.set(command.name, command);
-			message.reply(`Loaded ${command.name} successfully`);
+			message.reply(`Loaded \`${command.name}\` successfully`);
 		} catch (e) {
 			console.error(e.stack);
 			message.channel.send(`There was an error while loading a command \`${commandName}\`:\n\`${e.message}\``);

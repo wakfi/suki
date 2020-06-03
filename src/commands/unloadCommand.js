@@ -16,7 +16,7 @@ module.exports = {
 			try {
 				delete require.cache[require.resolve(`./${command.name}.js`)];
 				message.client.commands.sweep(cmd => cmd.name === command.name);
-				message.reply(`Successfully unloaded ${command.name}`);
+				message.reply(`Successfully unloaded \`${command.name}\``);
 			} catch (e) {
 				console.error(e.stack);
 				message.channel.send(`There was an error while unloading a command \`${command.name}\`:\n\`${e.message}\``);
