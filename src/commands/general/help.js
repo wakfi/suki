@@ -118,12 +118,14 @@ module.exports = {
 		} else {
 			// ?command -h
 			const commandName = args.shift();
-			if(!message.client.commands.has(commandName)) return;
-			const command = message.client.commands.get(commandName);
+			if(!message.client.commands.has(commandName) &&
+			   !message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))) return;
+			const command = message.client.commands.get(commandName)  ||
+							message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 			let fieldBody = ``;
 			if(command.aliases) fieldBody += `Alias(es): ${command.aliases.join(', ')}\n`;
 			fieldBody += `Description: ${command.description ? command.description : command.name.charAt(0).toUpperCase() + command.name.slice(1)}\n`;
-			fieldBody += `Usage: \`${prefix}${command.name} ${command.usage ? command.usage.join('`\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b `' + prefix + command.name + ' ') : ''}\`\n`;
+			fieldBody += `Usage: \`${prefix}${command.name}${command.usage ? ' ' + command.usage.join('`\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b `' + prefix + command.name + ' ') : ''}\`\n`;
 			if(command.category) fieldBody += `Category: ${command.category}\n`;
 			if(command.guildOnly) fieldBody += `*This command can only be used in a server channel*\n`;
 			else if(command.dmOnly) fieldBody += `*This command can only be used in a direct message*\n`;

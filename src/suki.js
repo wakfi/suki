@@ -67,7 +67,7 @@ client.on("message", async message => {
 					
 	if(!command) return;
 		
-	if(args.join(' ') === '-h') return client.commands.get('help').execute(message,[commandName]);
+	if(args.join(' ') === '-h') return client.commands.get('help').execute(message,[command.name]);
 	
 	if(command.guildOnly && message.channel.type !== 'text') return message.channel.send(`This command cannot be executed in DMs!`);
 	
