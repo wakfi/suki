@@ -32,12 +32,18 @@ module.exports = {
 	name: 'help',
 	description: 'Provides information about all commands, as well as information about specific commands',
 	category: 'general',
-	usage: [`[commandName]\`\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \`${prefix}<command> -h`],
+	usage: [`[-a|commandName]\`\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \`${prefix}<command> -h`],
 	aliases: ['commands','command','?'],
 	permLevel: 'User',
 	async execute(message, args) {
 		const level = permlevel(message);
-		const commands = message.client.commands.sorted((p, c) => levelCache[p.permLevel] - levelCache[c.permLevel] || (p.name < c.name ? -1 : 1));
+		const includeAll = (() =>
+		{
+			if(args.length == 0) return false;
+			if(args[0] === '-a'){args.shift(); return true;}
+			return false;
+		})();
+		const commands = message.client.commands.filter(cmd => includeAll || !cmd.unlisted).sorted((p, c) => levelCache[p.permLevel] - levelCache[c.permLevel] || (p.name < c.name ? -1 : 1));
 		if(args.length == 0)
 		{
 			// ?help
@@ -115,13 +121,15 @@ module.exports = {
 				.setTimestamp(new Date());
 			embedsToSend.forEach(async embed => await authorReply(message,embed));
 		} else {
-			// ?command -h
+			// ?command -h, ?help <command>
 			const commandName = args.shift();
 			if(!message.client.commands.has(commandName) &&
 			   !message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))) return;
 			const command = message.client.commands.get(commandName)  ||
 							message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+			if(level < levelCache[command.permLevel]) return;
 			let fieldBody = ``;
+			if(command.unlisted) fieldBody += `*Unlisted*\n`;
 			if(command.aliases) fieldBody += `Alias(es): ${command.aliases.join(', ')}\n`;
 			fieldBody += `Description: ${command.description ? command.description : command.name.charAt(0).toUpperCase() + command.name.slice(1)}\n`;
 			fieldBody += `Usage: \`${prefix}${command.name}${command.usage ? ' ' + command.usage.join('`\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b `' + prefix + command.name + ' ') : ''}\`\n`;
