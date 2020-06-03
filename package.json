@@ -18,7 +18,9 @@
   "homepage": "https://github.com/wakfi/suki#readme",
   "dependencies": {
     "discord.js": "^12.2.0",
+    "emoji-unicode": "^2.0.0",
     "fs-extra": "^9.0.0",
-    "got": "^11.1.4"
+    "got": "^11.1.4",
+    "svg-to-png": "^4.0.0"
   }
 }
