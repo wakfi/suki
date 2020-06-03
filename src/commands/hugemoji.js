@@ -82,21 +82,25 @@ module.exports = {
 				//the order here is: get svg image from remote (save local), convert to png (save local), send png, delete local svg and png
 				const emojiName = emojiMap[messageElement] ? emojiMap[messageElement][0] : emojiInUnicode;
 				const picFolder = `file_dump`;
+				await fs.ensureDir(picFolder).catch(e=>{return console.error(e.stack)});
+				const pfpatharr = __dirname.split(path.sep);
+				pfpatharr[pfpatharr.length-1] = picFolder;
+				const picFolderPath = pfpatharr.join(path.sep);
 				//data for vector image of emoji
 				const emojiSvg = await rp(githubResponseB.split('data-image  = "')[1].split('"')[0]);
-				await fs.outputFile(`./${picFolder}/${emojiInUnicode}.svg`,emojiSvg);
+				await fs.outputFile(`${picFolderPath}${path.sep}${emojiInUnicode}.svg`,emojiSvg);
 				//convert from svg to png
-				await svgToPng.convert(path.join(__dirname,picFolder,`${emojiInUnicode}.svg`),path.join(__dirname,picFolder),{defaultWidth:722,defaultHeight:722},{type:"image/png"});
+				await svgToPng.convert(path.join(picFolderPath,`${emojiInUnicode}.svg`), picFolderPath, {defaultWidth:722,defaultHeight:722},{type:"image/png"});
 				await message.channel.send({files: 
-					[{attachment: `./${picFolder}/${emojiInUnicode}.png`,
+					[{attachment: `${picFolderPath}${path.sep}${emojiInUnicode}.png`,
 					name: `${emojiName}.png`}]
 				}).catch(err=>{console.error(`Error sending a message:\n\t${typeof err==='string'?err.split('\n').join('\n\t'):err.stack}`)});
 				//cleanup created files
-				await fs.remove(`./${picFolder}/${emojiInUnicode}.svg`)
+				await fs.remove(`${picFolderPath}${path.sep}${emojiInUnicode}.svg`)
 				.catch(err => {
 					console.error(err.stack)
 				});
-				await fs.remove(`./${picFolder}/${emojiInUnicode}.png`)
+				await fs.remove(`${picFolderPath}${path.sep}${emojiInUnicode}.png`)
 				.catch(err => {
 					console.error(err.stack)
 				});
