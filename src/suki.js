@@ -1,6 +1,7 @@
 function main(){
 const Discord = require('discord.js');
 const fs = require('fs-extra');
+const path = require('path');
 const USERS_PATTERN = /<@!?\d{17,18}>/i
 
 const { prefix, clientOptions, activity, clientStatus} = require('./components/config.json');
@@ -10,16 +11,12 @@ const permLevels = require('./components/permLevels.js');
 const addTimestampLogs = require('./util/addTimestampLogs.js');
 const cleanReply = require('./util/cleanReply.js');
 const authorReply = require('./util/authorReply.js');
+const loadAllCommands = require('./util/loadAllCommands.js');
 
 const client = new Discord.Client(clientOptions);
 client.commands = new Discord.Collection();
-
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
-for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-	client.commands.set(command.name, command);
-}
+loadAllCommands(client, `${process.cwd()}/commands`);
+client.commands.delete(null);
 
 const levelCache = {};
 for (let i = 0; i < permLevels.length; i++) 
