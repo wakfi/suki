@@ -56,7 +56,7 @@ client.on("message", async message => {
 	if(message.author.bot) return; 
 	
 	const args = message.content.slice(prefix.length).split(/ +/g);
-	if(USERS_PATTERN.test(message.content))
+	if(USERS_PATTERN.test(message.content) && message.content.startsWith(`${message.client.user}`))
 	{
 		args.shift(); //clear mention
 		if(args.length == 0) return cleanReply(message, `type \`${prefix}help\` to see a list commands`, `15s`);
