@@ -12,7 +12,7 @@ module.exports = {
 	noArgs: true,
 	async execute(message, args) {
 		try {
-			//const botVersion = (await got('https://github.com/wakfi/suki/releases')).body.split('/wakfi/suki/releases/tag/')[1].split('"')[0];
+			const botVersion = (await got('https://github.com/wakfi/suki/releases')).body.split('/wakfi/suki/releases/tag/')[1].split('"')[0];
 			const djsVersion = (await got('https://github.com/wakfi/suki/blob/master/package.json', {resolveBodyOnly: true})).split('>discord.js<')[1].split('^')[1].split('<')[0];
 			const embed = new MessageEmbed()
 				.setTitle(`Suki`)
@@ -22,7 +22,7 @@ module.exports = {
 				.addField(`Help commands`,`${prefix}help, ${prefix}commands, ${prefix}command, ${prefix}?`)
 				.addField(`Library`,`Created in JavaScript using [discord.js](https://discord.js.org/) v${djsVersion}, a powerful node.js module that allows you to interact with the Discord API very easily`)
 				.addField(`Repository`,`This software is licensed under the MIT license. The GitHub repository for this project can be found at: https://github.com/wakfi/suki`)
-				//.setFooter(`Suki ${botVersion}`)
+				.setFooter(`suki ${botVersion}`)
 				.setTimestamp(new Date())
 				.setColor(0xFF00FF);
 			authorReply(message, embed);
