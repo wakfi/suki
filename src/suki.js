@@ -13,6 +13,8 @@ const cleanReply = require('./util/cleanReply.js');
 const authorReply = require('./util/authorReply.js');
 const loadAllCommands = require('./util/loadAllCommands.js');
 
+const welcomeMessage = require('./features/welcomeMessage.js');
+
 const client = new Discord.Client(clientOptions);
 client.commands = new Discord.Collection();
 loadAllCommands(client, `${process.cwd()}/commands`);
@@ -41,15 +43,23 @@ const permlevel = (message) => {
 	return permlvl;
 }
 
-client.once("ready", async () => {
-	client.user.setActivity(activity);
+client.once('ready', async () => 
+{
+	client.user.setPresence({activity:activity});
 	client.user.setStatus(clientStatus);
 	addTimestampLogs();
 	console.log(`Suki has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds`);
 });
 
+client.on('guildMemberAdd', async (member) => 
+{
+	await welcomeMessage(client,member);
+	console.log(`sent welcome message successfully`);
+});
+
 //this event triggers when a message is sent in a channel the bot has access to
-client.on("message", async message => {
+client.on("message", async message => 
+{
 	if(!message.content.startsWith(prefix) && !message.mentions.has(client.user)) return;
 	
 	if(message.author.bot) return; 
