@@ -35,6 +35,7 @@ module.exports = {
 	description: 'create a real big version of an emoji',
 	category: 'image',
 	usage: ['<emoji>'],
+	aliases: ['hugeemoji'],
 	permLevel: 'User',
 	args: true,
 	async execute(message, args) {

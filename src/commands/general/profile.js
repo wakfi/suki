@@ -32,7 +32,7 @@ const basicUserProfile = async (message, args) => {
 	}
 	const accountCreationTimestamp = (user.id/Math.pow(2,22)) + DISCORD_EPOCH;
 	const accountCreationTime = new Date(accountCreationTimestamp); //calculate user account creation timestamp
-	const accountCreationTimeDays = printTimePretty(millisecondsToString(Math.trunc((Date.now() - accountCreationTimestamp)/1000)*1000), 'd');
+	const accountCreationTimeDays = printTimePretty(millisecondsToString(Math.trunc((Date.now() - accountCreationTimestamp)/1000)*1000), 'd') || '0 days';
 	const embed = new MessageEmbed()
 		.setThumbnail(user.displayAvatarURL())
 		.setColor(0xFF00FF)
@@ -86,9 +86,9 @@ module.exports = {
 			const status = member.presence.status.charAt(0).toUpperCase() + member.presence.status.slice(1);
 			const richActivity = member.presence.activities.length > 0 ? member.presence.activities[0] : 'None';
 			const currentActivityString = richActivity.type ? `**${richActivity.type.charAt(0).toUpperCase()}${richActivity.type.slice(1).toLowerCase()} ${richActivity}** for ${printTimePretty(millisecondsToString(Date.now() - richActivity.createdTimestamp),'largest unit available')}` : richActivity;
-			const premiumSinceDays = member.premiumSinceTimestamp ? printTimePretty(millisecondsToString(Math.trunc((Date.now() - member.joinedAtTimestamp)/1000)*1000), 'd') : '';
-			const accountCreationTimeDays = printTimePretty(millisecondsToString(Math.trunc((Date.now() - accountCreationTimestamp)/1000)*1000), 'd');
-			const joinedAtDays = printTimePretty(millisecondsToString(Math.trunc((Date.now() - member.joinedTimestamp)/1000)*1000), 'd');
+			const premiumSinceDays = member.premiumSinceTimestamp ? printTimePretty(millisecondsToString(Math.trunc((Date.now() - member.joinedAtTimestamp)/1000)*1000), 'd') || '0 days' : '';
+			const accountCreationTimeDays = printTimePretty(millisecondsToString(Math.trunc((Date.now() - accountCreationTimestamp)/1000)*1000), 'd') || '0 days';
+			const joinedAtDays = printTimePretty(millisecondsToString(Math.trunc((Date.now() - member.joinedTimestamp)/1000)*1000), 'd') || '0 days';
 			const embed = new MessageEmbed()
 				.setThumbnail(member.user.displayAvatarURL())
 				.setColor(0xFF00FF)
