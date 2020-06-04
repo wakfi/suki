@@ -45,8 +45,7 @@ const permlevel = (message) => {
 
 client.once('ready', async () => 
 {
-	client.user.setPresence({activity:activity});
-	client.user.setStatus(clientStatus);
+	client.user.setPresence({activity:activity, status: clientStatus.status});
 	addTimestampLogs();
 	console.log(`Suki has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds`);
 });
