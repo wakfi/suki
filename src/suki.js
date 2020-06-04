@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const USERS_PATTERN = /<@!?\d{17,18}>/i
 
-const { prefix, clientOptions, activity, clientStatus} = require('./components/config.json');
+const { prefix, clientOptions, activity, clientStatus, welcome} = require('./components/config.json');
 const { token } = require('./components/token.json');
 const permLevels = require('./components/permLevels.js');
 
@@ -13,7 +13,7 @@ const cleanReply = require('./util/cleanReply.js');
 const authorReply = require('./util/authorReply.js');
 const loadAllCommands = require('./util/loadAllCommands.js');
 
-const welcomeMessage = require('./welcome/welcomeMessage.js');
+const welcomeMessage = require('./features/welcomeMessage.js');
 
 const client = new Discord.Client(clientOptions);
 client.commands = new Discord.Collection();
@@ -52,7 +52,8 @@ client.once('ready', async () =>
 
 client.on('guildMemberAdd', async (member) => 
 {
-	await welcomeMessage(client,member);
+	const channel = member.guild.channels.resolve(welcome.channelTarget);
+	await channel.send(await welcomeMessage(client,member));
 });
 
 //this event triggers when a message is sent in a channel the bot has access to
