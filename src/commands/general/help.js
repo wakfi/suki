@@ -133,6 +133,7 @@ module.exports = {
 			if(command.aliases) fieldBody += `Alias(es): ${command.aliases.join(', ')}\n`;
 			fieldBody += `Description: ${command.description ? command.description : command.name.charAt(0).toUpperCase() + command.name.slice(1)}\n`;
 			fieldBody += `Usage: \`${prefix}${command.name}${command.usage ? ' ' + command.usage.join('`\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b `' + prefix + command.name + ' ') : ''}\`\n`;
+			if(command.usageNote) fieldBody += `${command.usageNote}\n`;
 			if(command.category) fieldBody += `Category: ${command.category}\n`;
 			if(command.guildOnly) fieldBody += `*This command can only be used in a server channel*\n`;
 			else if(command.dmOnly) fieldBody += `*This command can only be used in a direct message*\n`;
