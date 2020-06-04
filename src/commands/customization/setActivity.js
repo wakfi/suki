@@ -71,7 +71,7 @@ module.exports = {
 				default:
 					throw new TypeError('type must be one of: PLAYING, STREAMING, LISTENING, WATCHING');
 			}
-		})(newActivity.type);
+		})(newActivity.type || 'PLAYING');
 		newActivity.type = type;
 		try {
 			config.activity = newActivity;
