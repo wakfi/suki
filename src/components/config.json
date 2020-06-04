@@ -1,0 +1,23 @@
+{
+    "prefix": "?",
+    "clientOptions": {
+        "autoReconnect": true,
+        "apiRequestMethod": "sequential",
+        "disabledEvents": ["TYPING_START","TYPING_STOP"],
+        "fetchAllMembers": true
+    },
+    "activity": {
+        "name": "?help for help",
+        "type": "PLAYING"
+    },
+    "clientStatus": {
+        "status": "online"
+    },
+    "moderators": [],
+    "modRoles": [],
+    "admins": [],
+    "adminRoles": [],
+    "serverOwner": "193160566334947340",
+    "developers": [],
+    "owner": "193160566334947340"
+}
