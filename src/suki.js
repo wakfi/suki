@@ -12,7 +12,6 @@ const addTimestampLogs = require('./util/addTimestampLogs.js');
 const cleanReply = require('./util/cleanReply.js');
 const authorReply = require('./util/authorReply.js');
 const loadAllCommands = require('./util/loadAllCommands.js');
-const firstLetterCapital = require('./util/firstLetterCapital.js');
 
 const welcomeMessage = require('./features/welcomeMessage.js');
 
@@ -72,45 +71,33 @@ client.on("message", async message =>
 	}
 	const commandName = args.shift();
 	
-	const command = require.main.validateCommand(commandName,message,args);
-	if(!command) return;
-	
-	try {
-		command.execute(message, args);
-	} catch(e) {
-		console.error(e.stack);
-		cleanReply(message, `There was an error trying to execute that command!`);
-	}
-});
-
-Object.defineProperty(require.main, 'validateCommand', {value: function(commandName,message,args) {
-	let wcfg = false;
-	const syms = args.find(arg => typeof arg === 'symbol');
-	if(syms === client.commands.get('welcomeConfig').wcfg) {wcfg = true; args.pop();}
 	const command = client.commands.get(commandName) || 
-					client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName)) || wcfg && 
-					 client.commands.find(cmd => cmd.wcfgAliases && cmd.wcfgAliases.includes(commandName));
+					client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 					
 	if(!command) return;
 		
-	if(args.join(' ') === '-h') {client.commands.get('help').execute(message,syms?[command.name,syms]:[command.name]); return syms ? {execute:function(){}} : null;}
+	if(args.join(' ') === '-h') return client.commands.get('help').execute(message,[command.name]);
 	
-	if(command.guildOnly && message.channel.type !== 'text') {message.channel.send(`This command cannot be executed in DMs!`); return;}
+	if(command.guildOnly && message.channel.type !== 'text') return message.channel.send(`This command cannot be executed in DMs!`);
 	
-	if(command.dmOnly && message.channel.type !== 'dm') {cleanReply(message, `This command can only be executed in DMs!`); return;}
+	if(command.dmOnly && message.channel.type !== 'dm') return cleanReply(message, `This command can only be executed in DMs!`);
 	
 	if((args.length==0 && command.args) || (args.length > 0 && command.noArgs))
 	{
 		let reply = `Invalid command syntax. Try sending me \`${prefix}${command.name} -h\` for help with this command`;
-		cleanReply(message, reply, '20s');
-		return;
+		return cleanReply(message, reply, '20s');
 	}
 	
 	const level = permlevel(message);
-	if(level < levelCache[command.permLevel]) {cleanReply(message, `You don't have permission to use this command`); return;}
+	if(level < levelCache[command.permLevel]) return cleanReply(message, `You don't have permission to use this command`);
 	
-	return command;
-}, writable: true, enumerable: true, configurable: true});
+	try {
+		command.execute(message, args);
+	} catch(e) {
+		console.error(e);
+		cleanReply(message, `There was an error trying to execute that command!`);
+	}
+});
 
 client.login(token);
 }

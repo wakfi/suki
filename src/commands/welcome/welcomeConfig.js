@@ -1,6 +1,6 @@
 const path = require('path');
 const MessageEmbed = require((require.resolve('discord.js')).split(path.sep).slice(0, -1).join(path.sep) + `${path.sep}structures${path.sep}MessageEmbed.js`);
-const { welcome } = require(`${process.cwd()}/components/config.json`);
+const { prefix,welcome } = require(`${process.cwd()}/components/config.json`);
 const welcomeMessage = require(`${process.cwd()}/features/welcomeMessage.js`);
 const selfDeleteReply = require(`${process.cwd()}/util/selfDeleteReply.js`);
 const cleanReply = require(`${process.cwd()}/util/cleanReply.js`);
@@ -11,9 +11,9 @@ const wcfgSym = Symbol('wcfgSym')
 
 module.exports = {
 	name: 'welcomeConfig',
-	description: 'Welcome message configuration assistant. Services inclide usi welcome message configuration commands with shorter aliases, displaying a list of config commands, creating a preview of the welcome message on-demand, and displaying the current config raw-data',
+	description: 'Welcome message configuration assistant. Services inclide using welcome message configuration commands with shorter aliases, displaying a list of config commands, creating a preview of the welcome message on-demand, and displaying the current config raw-data',
 	category: 'welcome',
-	usage: ['[-p|-a|-l]'],
+	usage: ['[-p|-a|-l]','<welcome config command> [-h]'],
 	aliases: ['wcfg'],
 	permLevel: 'Bot Admin',
 	guildOnly: true,
@@ -65,16 +65,33 @@ module.exports = {
 		
 		const parsedArgs = posit.args;
 		const commandName = parsedArgs.shift();
-		parsedArgs.push(this.wcfg);
 		
-		const command = require.main.validateCommand(commandName, message, parsedArgs);
-		if(!command) return selfDeleteReply(message, `could not find welcome command ${commandName}`, '15s');
+		const command = message.client.commands.get(commandName) || 
+						message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName) || 
+													cmd.wcfgAliases && cmd.wcfgAliases.includes(commandName));
+						
+		if(!command) return;
+			
+		if(args.join(' ') === '-h') return message.client.commands.get('help').execute(message,[command.name,this.wcfg]);
+		
+		if(command.guildOnly && message.channel.type !== 'text') return message.channel.send(`This command cannot be executed in DMs!`);
+		
+		if(command.dmOnly && message.channel.type !== 'dm') return cleanReply(message, `This command can only be executed in DMs!`);
+		
+		if((args.length==0 && command.args) || (args.length > 0 && command.noArgs))
+		{
+			let reply = `Invalid command syntax. Try sending me \`${prefix}${this.name} ${command.name} -h\` for help with this command`;
+			return cleanReply(message, reply, '20s');
+		}
+		
+		const level = permlevel(message);
+		if(level < levelCache[command.permLevel]) return cleanReply(message, `You don't have permission to use this command`);
 		
 		try {
-			command.execute(message, parsedArgs);
+			command.execute(message, args);
 		} catch(e) {
-			console.error(e.stack);
-			selfDeleteReply(message, `There was an error trying to execute that command!`,'15s');
+			console.error(e);
+			cleanReply(message, `There was an error trying to execute that command!`);
 		}
 	}
 };
