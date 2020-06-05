@@ -90,7 +90,7 @@ module.exports = {
 		try {
 			command.execute(message, args);
 		} catch(e) {
-			console.error(e);
+			console.error(e.stack);
 			cleanReply(message, `There was an error trying to execute that command!`);
 		}
 	}
