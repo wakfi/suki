@@ -33,11 +33,11 @@ function parseTruthyArgs(args,keys,flags,options)
 				found.splice(indexKey,1);
 				args.splice(args.indexOf(key),1);
 				Object.defineProperty(obj, key, {value: true, writable: true, enumerable: true, configurable: true});
+				count++;
 			} else {
 				Object.defineProperty(obj, key, {value: false, writable: true, enumerable: true, configurable: true});
 			}
 		}
-		count = found.length;
 	}
 	Object.defineProperty(obj, 'args', {value: args, writable: true, enumerable: true, configurable: true});
 	Object.defineProperty(obj, 'found', {value: found, writable: true, enumerable: true, configurable: true});
