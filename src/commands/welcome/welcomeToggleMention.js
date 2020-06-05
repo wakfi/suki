@@ -13,6 +13,7 @@ module.exports = {
 	usageNote: 'Using this command without arguments toggles the current state',
 	permLevel: 'Bot Admin',
 	guildOnly: true,
+	wcfgAliases: ['toggleMention','tgm'],
 	async execute(message, args) {
 		const joinArgs = args.join(' ');
 		const newMentionState = 									   		!args.length ? !config.welcome.mention : 

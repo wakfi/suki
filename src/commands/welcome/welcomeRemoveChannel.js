@@ -15,6 +15,7 @@ module.exports = {
 	permLevel: 'Bot Admin',
 	guildOnly: true,
 	args: true,
+	wcfgAliases: ['removeChannel','rmc'],
 	async execute(message, args) {
 		const channelID = message.guild.channels.resolveID(resolveMention(args.join(' '), CHANNELS_PATTERN));
 		if(!channelID) return selfDeleteReply(message, `you must provide a channel`, '15s');

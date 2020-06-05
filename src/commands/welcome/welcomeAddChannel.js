@@ -18,6 +18,7 @@ module.exports = {
 	permLevel: 'Bot Admin',
 	guildOnly: true,
 	args: true,
+	wcfgAliases: ['addChannel','adc'],
 	async execute(message, args) {
 		const keys = ['channelResolve','description']
 		const flags = ['-c','-d'];

@@ -15,6 +15,7 @@ module.exports = {
 	aliases: ['welcomeSetMessage','welcomeSetMessageBody','welcomeSetDescription'],
 	permLevel: 'Bot Admin',
 	guildOnly: true,
+	wcfgAliases: ['setBody','setMessage','setMessageBody','setDescription','smb'],
 	async execute(message, args) {
 		const newBody = args.join(' ');
 		if(config.welcome.messageBody == newBody) return selfDeleteReply(message, `message body is already ${!config.welcome.messageBody?'empty':'set to\n>>> '+config.welcome.messageBody}`, '15s');

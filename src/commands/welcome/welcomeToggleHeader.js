@@ -14,6 +14,7 @@ module.exports = {
 	permLevel: 'Bot Admin',
 	guildOnly: true,
 	unlisted: true,
+	wcfgAliases: ['toggleHeader','tgh'],
 	async execute(message, args) {
 		const joinArgs = args.join(' ');
 		const newHeaderState = 									   			!args.length ? !config.welcome.header : 

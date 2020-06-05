@@ -8,13 +8,14 @@ const cleanReply = require(`${process.cwd()}/util/cleanReply.js`);
 
 module.exports = {
 	name: 'welcomeSetHeaderText',
-	description: 'Set text of welcome message header. Does not enable or disable header',
+	description: 'Set text of welcome message header',
 	category: 'welcome',
 	usage: ['[header text]'],
 	usageNote: 'Using this command without arguments clears the saved text and removes the field from the embed; the header reamins enabled however, and setting text again later will cause it to begin displaying',
 	aliases: ['welcomeSetTitle'],
 	permLevel: 'Bot Admin',
 	guildOnly: true,
+	wcfgAliases: ['setHeaderText','setTitle','sh'],
 	async execute(message, args) {
 		const newHeader = args.join(' ');
 		if(config.welcome.headerText == newHeader) return selfDeleteReply(message, `header text is already ${!config.welcome.headerText?'empty':'set to\n>>> '+config.welcome.headerText}`, '15s');
