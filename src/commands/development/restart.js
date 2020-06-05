@@ -5,6 +5,8 @@ module.exports = {
 	permLevel: 'Moderator',
 	noArgs: true,
 	async execute(message, args) {
+		await message.client.user.setStatus('invisible');
+		await message.channel.send(`Restarting now...`);
 		process.exit(0);
 	}
 };
