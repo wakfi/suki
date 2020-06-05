@@ -92,7 +92,7 @@ client.on("message", async message =>
 	if(level < client.levelCache[command.permLevel]) return cleanReply(message, `You don't have permission to use this command`);
 	
 	try {
-		command.execute(message, args);
+		await command.execute(message, args);
 	} catch(e) {
 		console.error(e.stack);
 		cleanReply(message, `There was an error trying to execute that command!`);
