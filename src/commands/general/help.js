@@ -3,32 +3,8 @@ const MessageEmbed = require((require.resolve('discord.js')).split(path.sep).sli
 const authorReply = require(`${process.cwd()}/util/authorReply.js`);
 const parseTruthyArgs = require(`${process.cwd()}/util/parseTruthyArgs.js`);
 const {prefix} = require(`${process.cwd()}/components/config.json`);
-const permLevels = require(`${process.cwd()}/components/permLevels.js`);
 const EMBED_BACKGROUND_COLOR_IMAGE = `https://i.imgur.com/0NR5nbD.png`;
 const EMBED_MAX_FIELDS = 25;
-
-const levelCache = {};
-for (let i = 0; i < permLevels.length; i++) 
-{
-	const thisLevel = permLevels[i];
-	levelCache[thisLevel.name] = thisLevel.level;
-}
-
-const permlevel = (message) => {
-	let permlvl = 0;
-
-	const permOrder = permLevels.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
-
-	while (permOrder.length) {
-		const currentLevel = permOrder.shift();
-		if (message.guild && currentLevel.guildOnly) continue;
-		if (currentLevel.check(message)) {
-			permlvl = currentLevel.level;
-			break;
-		}
-	}
-	return permlvl;
-}
 
 module.exports = {
 	name: 'help',
@@ -38,7 +14,7 @@ module.exports = {
 	aliases: ['commands','command','?'],
 	permLevel: 'User',
 	async execute(message, args) {
-		const level = permlevel(message);
+		const level = message.client.permlevel(message);
 		let wcfgOn = false;
 		const filter = (function(){
 			const syms = args.find(arg => typeof arg === 'symbol');
@@ -46,8 +22,7 @@ module.exports = {
 			return (cmd => truthy.allin || !cmd.unlisted);
 		})();
 		const truthy = parseTruthyArgs(args, ['allin'], ['-a']);
-		const commands = message.client.commands.filter(filter).sorted((p, c) => levelCache[p.permLevel] - levelCache[c.permLevel] || (p.name < c.name ? -1 : 1));
-		//if(wcfgOn) commands.delete('welcomeConfig');
+		const commands = message.client.commands.filter(filter).sorted((p, c) => message.client.levelCache[p.permLevel] - message.client.levelCache[c.permLevel] || (p.name < c.name ? -1 : 1));
 		if(args.length == 0)
 		{
 			// ?help
@@ -57,7 +32,7 @@ module.exports = {
 				.setTitle(`${message.client.user.username} Help`)
 				.setDescription(`Send \`${prefix}command -h\` with any command for more information about that command`)
 				.setColor(0xFF00FF);
-			let previousCMDLevel = levelCache[commands.first().permLevel];
+			let previousCMDLevel = message.client.levelCache[commands.first().permLevel];
 			let cmdArr = [[]];
 			let numberOfFields = 0;
 			let cmdIndex = 0;
@@ -100,7 +75,7 @@ module.exports = {
 			cmdArr.forEach(subArr => {
 				subArr.forEach(cmd => {
 					const embed = embeds[cmdIndex];
-					cmdLevel = levelCache[cmd.permLevel];
+					cmdLevel = message.client.levelCache[cmd.permLevel];
 					if(level >= cmdLevel)
 					{
 						if(cmdLevel > previousCMDLevel)
@@ -132,7 +107,7 @@ module.exports = {
 			   !message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))) return;
 			const command = message.client.commands.get(commandName)  ||
 							message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-			if(level < levelCache[command.permLevel]) return;
+			if(level < message.client.levelCache[command.permLevel]) return;
 			let fieldBody = ``;
 			if(command.unlisted) fieldBody += `*Unlisted*\n`;
 			if(command.aliases) fieldBody += `Alias(es): ${command.aliases.join(', ')}\n`;

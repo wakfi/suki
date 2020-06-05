@@ -20,14 +20,14 @@ client.commands = new Discord.Collection();
 loadAllCommands(client, `${process.cwd()}/commands`);
 client.commands.delete(null);
 
-const levelCache = {};
+client.levelCache = {};
 for (let i = 0; i < permLevels.length; i++) 
 {
 	const thisLevel = permLevels[i];
-	levelCache[thisLevel.name] = thisLevel.level;
+	client.levelCache[thisLevel.name] = thisLevel.level;
 }
 
-const permlevel = (message) => {
+client.permlevel = (message) => {
 	let permlvl = 0;
 
 	const permOrder = permLevels.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
@@ -41,7 +41,7 @@ const permlevel = (message) => {
 		}
 	}
 	return permlvl;
-}
+};
 
 client.once('ready', async () => 
 {
@@ -88,8 +88,8 @@ client.on("message", async message =>
 		return cleanReply(message, reply, '20s');
 	}
 	
-	const level = permlevel(message);
-	if(level < levelCache[command.permLevel]) return cleanReply(message, `You don't have permission to use this command`);
+	const level = client.permlevel(message);
+	if(level < client.levelCache[command.permLevel]) return cleanReply(message, `You don't have permission to use this command`);
 	
 	try {
 		command.execute(message, args);

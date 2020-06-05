@@ -7,7 +7,7 @@ const cleanReply = require(`${process.cwd()}/util/cleanReply.js`);
 const parsePositionalArgs = require(`${process.cwd()}/util/parsePositionalArgs.js`);
 const parseTruthyArgs = require(`${process.cwd()}/util/parseTruthyArgs.js`);
 const firstLetterCapital = require(`${process.cwd()}/util/firstLetterCapital.js`);
-const wcfgSym = Symbol('wcfgSym')
+const wcfgSym = Symbol('wcfgSym');
 
 module.exports = {
 	name: 'welcomeConfig',
@@ -84,8 +84,8 @@ module.exports = {
 			return cleanReply(message, reply, '20s');
 		}
 		
-		const level = permlevel(message);
-		if(level < levelCache[command.permLevel]) return cleanReply(message, `You don't have permission to use this command`);
+		const level = message.client.permlevel(message);
+		if(level < message.client.levelCache[command.permLevel]) return cleanReply(message, `You don't have permission to use this command`);
 		
 		try {
 			command.execute(message, args);
