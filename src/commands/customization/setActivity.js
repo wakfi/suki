@@ -81,10 +81,10 @@ module.exports = {
 				console.error(`Error saving updated activity`);
 				console.error(e.stack);
 			});
-			selfDeleteReply(message, `Activity has been changed to \`${firstLetterCapital(config.activity.type==='LISTENING'? 'LISTENING TO':config.activity.type)} ${config.activity.name}\``, '6s');
+			selfDeleteReply(message, `activity has been changed to \`${firstLetterCapital(config.activity.type==='LISTENING'? 'LISTENING TO':config.activity.type)} ${config.activity.name}\``, '6s');
 		} catch(e) {
 			console.error(e.stack);
-			selfDeleteReply(message, `An error occurred while trying to change my activity: ${e}`, '20s');
+			selfDeleteReply(message, `an error occurred while trying to change my activity: ${e}`, '20s');
 		}
 	}
 };

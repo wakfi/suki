@@ -25,7 +25,7 @@ const basicUserProfile = async (message, args) => {
 			const manager = message.client.users;
 			user = await manager.fetch(manager.resolveID(toResolve));
 		} catch(e) {
-			return selfDeleteReply(message, `Could not resolve "${joinArgs}" to a user`);
+			return selfDeleteReply(message, `could not resolve "${joinArgs}" to a user`);
 		}
 	} else {
 		user = message.author;

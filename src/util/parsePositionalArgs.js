@@ -7,7 +7,7 @@ function parsePositionalArgs(args,keys,flags,options)
 	let singlePosition = options.singlePosition;
 	if(typeof flagRegex === 'undefined') flagRegex = dashflagRegex;
 	if(!(flagRegex instanceof RegExp)) throw new TypeError(`flagRegex must be a Regular Expression`);
-	if(keys.length != flags.length) throw new RangeError(`Must have same number of keys and flags`);
+	if(keys.length != flags.length) throw new RangeError(`must have same number of keys and flags`);
 	const obj = {};
 	for(let i = 0; i < keys.length; i++)
 	{

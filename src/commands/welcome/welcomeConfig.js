@@ -74,24 +74,24 @@ module.exports = {
 			
 		if(args.join(' ') === '-h') return message.client.commands.get('help').execute(message,[command.name,this.wcfg]);
 		
-		if(command.guildOnly && message.channel.type !== 'text') return message.channel.send(`This command cannot be executed in DMs!`);
+		if(command.guildOnly && message.channel.type !== 'text') return message.reply(`this command cannot be executed in DMs!`);
 		
-		if(command.dmOnly && message.channel.type !== 'dm') return cleanReply(message, `This command can only be executed in DMs!`);
+		if(command.dmOnly && message.channel.type !== 'dm') return cleanReply(message, `this command can only be executed in DMs!`);
 		
 		if((args.length==0 && command.args) || (args.length > 0 && command.noArgs))
 		{
-			let reply = `Invalid command syntax. Try sending me \`${prefix}${this.name} ${command.name} -h\` for help with this command`;
+			let reply = `invalid command syntax. Try sending me \`${prefix}${this.name} ${command.name} -h\` for help with this command`;
 			return cleanReply(message, reply, '20s');
 		}
 		
 		const level = message.client.permlevel(message);
-		if(level < message.client.levelCache[command.permLevel]) return cleanReply(message, `You don't have permission to use this command`);
+		if(level < message.client.levelCache[command.permLevel]) return cleanReply(message, `you don't have permission to use this command`);
 		
 		try {
 			await command.execute(message, args);
 		} catch(e) {
 			console.error(e.stack);
-			cleanReply(message, `There was an error trying to execute that command!`);
+			cleanReply(message, `there was an error trying to execute that command!`, '18s');
 		}
 	}
 };

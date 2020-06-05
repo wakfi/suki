@@ -17,8 +17,8 @@ module.exports = {
 		await recordFile(config, configPath).catch(e=>
 		{
 			console.error(e.stack);
-			return selfDeleteReply(message, `Looks like something went wrong, and your prefix wasn't updated. You should still be able to use the old prefix (Error: ${e})`, '35s');
+			return selfDeleteReply(message, `looks like something went wrong, and your prefix wasn't updated. You should still be able to use the old prefix (Error: ${e})`, '35s');
 		});
-		selfDeleteReply(message, `The prefix was successfully updated to \`${config.prefix}\`! ***Please restart me to apply this change***`, '15s');
+		selfDeleteReply(message, `the prefix was successfully updated to \`${config.prefix}\`! ***Please restart me to apply this change***`, '15s');
 	}
 };

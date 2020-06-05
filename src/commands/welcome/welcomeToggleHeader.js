@@ -4,6 +4,7 @@ const config = require(configPath);
 const welcomeMessage = require(`${process.cwd()}/features/welcomeMessage.js`);
 const recordFile = require(`${process.cwd()}/util/recordFile.js`);
 const selfDeleteReply = require(`${process.cwd()}/util/selfDeleteReply.js`);
+const cleanReply = require(`${process.cwd()}/util/cleanReply.js`);
 
 module.exports = {
 	name: 'welcomeToggleHeader',
@@ -27,7 +28,7 @@ module.exports = {
 			console.error(e.stack);
 			return selfDeleteReply(message, `looks like something went wrong; header state was not modified (Error: ${e})`, '25s');
 		});
-		selfDeleteReply(message, `set header to \`${config.welcome.header}\``);
+		cleanReply(message, `set header to \`${config.welcome.header}\``);
 		selfDeleteReply(message, {...await welcomeMessage(message.client, message.member), duration:'1m', sendStandard:true});
 	}
 };

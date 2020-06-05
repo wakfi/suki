@@ -4,6 +4,7 @@ const config = require(configPath);
 const welcomeMessage = require(`${process.cwd()}/features/welcomeMessage.js`);
 const recordFile = require(`${process.cwd()}/util/recordFile.js`);
 const selfDeleteReply = require(`${process.cwd()}/util/selfDeleteReply.js`);
+const cleanReply = require(`${process.cwd()}/util/cleanReply.js`);
 const resolveMention = require(`${process.cwd()}/util/resolveMention.js`);
 const parsePositionalArgs = require(`${process.cwd()}/util/parsePositionalArgs.js`);
 const CHANNELS_PATTERN = /<#(\d{17,18})>/i;
@@ -55,7 +56,7 @@ module.exports = {
 			console.error(e.stack);
 			return selfDeleteReply(message, `looks like something went wrong; ${channel} was not added to welcome message noted channels (Error: ${e})`, '25s');
 		});
-		selfDeleteReply(message, `Added ${channel} to welcome message noted channels!`);
+		cleanReply(message, `added ${channel} to welcome message noted channels!`);
 		selfDeleteReply(message, {...await welcomeMessage(message.client, message.member), duration:'1m', sendStandard:true});
 	}
 };

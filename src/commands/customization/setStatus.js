@@ -53,6 +53,6 @@ module.exports = {
 			console.error(`Error saving updated status`);
 			console.error(e.stack);
 		});
-		selfDeleteReply(message, `Status has been changed to \`${newStatus}\``, '6s');
+		selfDeleteReply(message, `status has been changed to \`${newStatus}\``, '6s');
 	}
 };

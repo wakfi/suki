@@ -35,7 +35,7 @@ module.exports = {
 				startID = pipedArgs.shift();
 				if(!manager.resolveID(startID))
 				{
-					return cleanReply(message, `Must provide a valid message ID`);
+					return cleanReply(message, `must provide a valid message ID`);
 				}
 				const afterResult = await manager.fetch({limit: 1, before: startID});
 				afterID = (afterResult.size == 1) ? afterResult.first().id : startID;
@@ -53,7 +53,7 @@ module.exports = {
 				} else {
 					if(!manager.resolveID(startID) || !manager.resolveID(endID))
 					{
-						return await cleanReply(message, `Please provide valid message IDs`);
+						return cleanReply(message, `please provide valid message IDs`);
 					}
 					const afterResult = await manager.fetch({limit: 1, before: startID});
 					const beforeResult = await manager.fetch({limit: 1, after: endID});
@@ -74,19 +74,19 @@ module.exports = {
 				
 				fetchOptions = {limit: deleteCount};
 			} else {
-				return cleanReply(message, `Unknown purge command: ${keyword}`);
+				return cleanReply(message, `unknown purge command: ${keyword}`);
 			}
 		}
 		
 		if(isNaN(deleteCount))
 		{
-			return cleanReply(message, `Number of messages to delete must be a number`);
+			return cleanReply(message, `number of messages to delete must be a number`);
 		}
 		
 		// combined conditions <3 user must input between 2-99
 		if(!deleteCount || deleteCount < 3 || deleteCount > 100)
 		{
-			return cleanReply(message, `Please provide a number between 2 and 99 (inclusive) for the number of messages to delete`);
+			return cleanReply(message, `please provide a number between 2 and 99 (inclusive) for the number of messages to delete`);
 		}
 		
 		// So we get our messages, and delete them. Simple enough, right?
@@ -94,15 +94,16 @@ module.exports = {
 		
 		if(!fetched.has(endID) || startID && !fetched.has(startID))
 		{
-			const errText = keyword === "from" ? `Message ID must be within 99 messages of the most recent message` :
-												 `The older message provided must be within 99 messages of the newer message`;
+			const errText = keyword === "from" ? `message ID must be within 99 messages of the most recent message` :
+												 `the older message provided must be within 99 messages of the newer message`;
 			return cleanReply(message, errText);
 		}
 		
 		message.channel.bulkDelete(fetched)
-		.catch(async error => 
+		.catch(async e => 
 		{
-			cleanReply(message, `Couldn't delete messages because of: ${error}`);
+			console.error(e.stack);
+			cleanReply(message, `couldn't delete messages because of: ${e}`);
 		});
 	}
 };
