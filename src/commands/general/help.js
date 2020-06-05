@@ -1,8 +1,10 @@
 const path = require('path');
 const MessageEmbed = require((require.resolve('discord.js')).split(path.sep).slice(0, -1).join(path.sep) + `${path.sep}structures${path.sep}MessageEmbed.js`);
 const authorReply = require(`${process.cwd()}/util/authorReply.js`);
+const parseTruthyArgs = require(`${process.cwd()}/util/parseTruthyArgs.js`);
 const {prefix} = require(`${process.cwd()}/components/config.json`);
 const permLevels = require(`${process.cwd()}/components/permLevels.js`);
+const EMBED_BACKGROUND_COLOR_IMAGE = `https://i.imgur.com/0NR5nbD.png`;
 const EMBED_MAX_FIELDS = 25;
 
 const levelCache = {};
@@ -37,20 +39,22 @@ module.exports = {
 	permLevel: 'User',
 	async execute(message, args) {
 		const level = permlevel(message);
-		const includeAll = (() =>
-		{
-			if(args.length == 0) return false;
-			if(args[0] === '-a'){args.shift(); return true;}
-			return false;
+		let wcfgOn = false;
+		const filter = (function(){
+			const syms = args.find(arg => typeof arg === 'symbol');
+			if(syms === message.client.commands.get('welcomeConfig').wcfg) {wcfgOn=true; args.pop();return (cmd => !cmd.unlisted && cmd.category === 'welcome');}
+			return (cmd => truthy.allin || !cmd.unlisted);
 		})();
-		const commands = message.client.commands.filter(cmd => includeAll || !cmd.unlisted).sorted((p, c) => levelCache[p.permLevel] - levelCache[c.permLevel] || (p.name < c.name ? -1 : 1));
+		const truthy = parseTruthyArgs(args, ['allin'], ['-a']);
+		const commands = message.client.commands.filter(filter).sorted((p, c) => levelCache[p.permLevel] - levelCache[c.permLevel] || (p.name < c.name ? -1 : 1));
+		//if(wcfgOn) commands.delete('welcomeConfig');
 		if(args.length == 0)
 		{
 			// ?help
 			const embeds = [];
 			embeds[0] = new MessageEmbed()
-				.setThumbnail(`https://i.imgur.com/0NR5nbD.png`)
-				.setTitle(`${message.client.user.username} Help`)//, message.client.user.displayAvatarURL())
+				.setThumbnail(EMBED_BACKGROUND_COLOR_IMAGE)
+				.setTitle(`${message.client.user.username} Help`)
 				.setDescription(`Send \`${prefix}command -h\` with any command for more information about that command`)
 				.setColor(0xFF00FF);
 			let previousCMDLevel = levelCache[commands.first().permLevel];
@@ -82,7 +86,7 @@ module.exports = {
 					if(cmdIndex == embeds.length)
 					{
 						embeds.push(new MessageEmbed()
-							.setThumbnail(`https://i.imgur.com/0NR5nbD.png`)
+							.setThumbnail(EMBED_BACKGROUND_COLOR_IMAGE)
 							.setColor(0xFF00FF)
 						);
 					}
@@ -109,6 +113,7 @@ module.exports = {
 						checkCount();
 						let fieldBody = ``;
 						fieldBody += `Description: ${cmd.description?cmd.description:'No Description'}\n`;
+						if(wcfgOn && cmd.wcfgAliases) fieldBody += `Config Alias(es): ${cmd.wcfgAliases.join(', ')}\n`;
 						embed.addField(`${prefix}${cmd.name}`,fieldBody.trim());
 						numberOfFields++;
 						checkCount();
@@ -119,7 +124,7 @@ module.exports = {
 			embedsToSend[embedsToSend.length-1]
 				.setFooter(`${prefix}help, ${prefix}commands, ${prefix}command, ${prefix}?`)
 				.setTimestamp(new Date());
-			embedsToSend.forEach(async embed => await authorReply(message,embed));
+			embedsToSend.forEach(async embed => wcfgOn ? await message.channel.send(embed) : await authorReply(message,embed));
 		} else {
 			// ?command -h, ?help <command>
 			const commandName = args.shift();
@@ -131,6 +136,7 @@ module.exports = {
 			let fieldBody = ``;
 			if(command.unlisted) fieldBody += `*Unlisted*\n`;
 			if(command.aliases) fieldBody += `Alias(es): ${command.aliases.join(', ')}\n`;
+			if(wcfgOn && command.wcfgAliases) fieldBody += `Config Alias(es): ${command.wcfgAliases.join(', ')}\n`;
 			fieldBody += `Description: ${command.description ? command.description : command.name.charAt(0).toUpperCase() + command.name.slice(1)}\n`;
 			fieldBody += `Usage: \`${prefix}${command.name}${command.usage ? ' ' + command.usage.join('`\n\u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b \u200b `' + prefix + command.name + ' ') : ''}\`\n`;
 			if(command.usageNote) fieldBody += `${command.usageNote}\n`;
@@ -143,7 +149,7 @@ module.exports = {
 				.addField(`${command.permLevel==='User' ? 'Available to all users' : 'Restricted to: ' + command.permLevel}`, fieldBody.trim())
 				.setFooter(`\`<arg>\` denotes required arguments; \`[arg]\` denotes optional arguments`)
 				.setTimestamp(new Date());
-			authorReply(message, embed);
+			wcfgOn ? message.channel.send(embed) : authorReply(message, embed);
 		}
 	}
 };
