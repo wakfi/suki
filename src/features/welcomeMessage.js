@@ -9,15 +9,14 @@ function welcomeMessage(client,member)
 	{
 		const manager = member.guild.channels;
 		const emojiResolver = client.emojis;
-		//const channel = manager.resolve(welcome.channelTarget);
 		const embed = new MessageEmbed();
 		if(welcome.header && welcome.headerText) embed.setTitle(welcome.headerText);
 		const descriptionText = [`${welcome.messageBody}\n`];
 		if(!welcome.mention && !welcome.messageBody) descriptionText.pop();
-		welcome.importantChannels.forEach(channelID => 
+		welcome.importantChannels.forEach(channelResolve => 
 		{
-			const channel = manager.resolve(channelID);
-			const emj = welcome.emojis[channel.id] || EMBED_BLANK_SPACE_EMOJI;
+			const channelID = manager.resolveID(channelResolve);
+			const emj = welcome.emojis[channelID] || EMBED_BLANK_SPACE_EMOJI;
 			const emoji = ((emj) => {
 				let resolved;
 				try{	
@@ -29,13 +28,12 @@ function welcomeMessage(client,member)
 				}
 				return resolved;
 			})(emj);
-			descriptionText.push(`${emojiResolver.resolve(emj) || emj}${channel}${welcome.descriptions[channel.id] ? ' - ' + welcome.descriptions[channel.id] : ''}`);
+			descriptionText.push(`${emojiResolver.resolve(emj) || emj}<#${channelID}>${welcome.descriptions[channelID] ? ' - ' + welcome.descriptions[channelID] : ''}`);
 		});
 		embed.setDescription(descriptionText.join('\n'))
 			 .setColor(0xFF00FF)
 			 .setFooter(member.guild.name, member.guild.iconURL())
 			 .setTimestamp(new Date());
-		//await channel.send(embed).catch(e => console.error);
 		resolve({embed:embed,content:`${welcome.mention?member:''}`,allowedMentions:{users:[member.id]}});
 	});
 }
