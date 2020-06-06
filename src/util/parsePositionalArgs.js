@@ -3,9 +3,8 @@ const dashflagRegex = /(?<=\s|^)-[a-zA-Z]+(?=\s|$)/;
 function parsePositionalArgs(args,keys,flags,options) 
 {
 	if(typeof options === 'undefined') options = {};
-	let flagRegex = options.flagRegex;
-	let singlePosition = options.singlePosition;
-	if(typeof flagRegex === 'undefined') flagRegex = dashflagRegex;
+	let flagRegex = options.flagRegex || dashflagRegex;
+	const singlePosition = options.singlePosition || false;
 	if(!(flagRegex instanceof RegExp)) throw new TypeError(`flagRegex must be a Regular Expression`);
 	if(keys.length != flags.length) throw new RangeError(`must have same number of keys and flags`);
 	const obj = {};
