@@ -4,6 +4,7 @@ about: Found something that's not working correctly?
 title: ''
 labels: 'bug report'
 assignees: ''
+projects: 'Issue Triage'
 
 ---
 
