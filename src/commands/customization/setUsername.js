@@ -11,10 +11,10 @@ module.exports = {
 		const newUsername = args.join(' ');
 		try {
 			await message.client.user.setUsername(newUsername);
-			selfDeleteReply(message, `My username is now ${message.client.user.username}`, '8s');
+			selfDeleteReply(message, `my username is now ${message.client.user.username}`, '8s');
 		} catch(e) {
 			console.error(e.stack);
-			selfDeleteReply(message, `An error occurred while trying to change my username: ${e}`, '15s');
+			selfDeleteReply(message, `an error occurred while trying to change my username: ${e}`, '15s');
 		}
 	}
 };

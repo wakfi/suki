@@ -25,7 +25,7 @@ const basicUserProfile = async (message, args) => {
 			const manager = message.client.users;
 			user = await manager.fetch(manager.resolveID(toResolve));
 		} catch(e) {
-			return selfDeleteReply(message, `Could not resolve "${joinArgs}" to a user`);
+			return selfDeleteReply(message, `could not resolve "${joinArgs}" to a user`);
 		}
 	} else {
 		user = message.author;
@@ -66,7 +66,7 @@ module.exports = {
 				try	{
 					member = await manager.fetch(manager.resolveID(toResolve));
 				} catch(e) {
-					member = manager.cache.find(member => member.displayName.startsWith(joinArgs));
+					member = manager.cache.find(member => member.displayName.startsWithIgnoreCase(joinArgs));
 					if(member == null)
 					{
 						return basicUserProfile(message, args);
@@ -78,7 +78,8 @@ module.exports = {
 			const accountCreationTimestamp = (member.id/Math.pow(2,22)) + DISCORD_EPOCH;
 			const accountCreationTime = new Date(accountCreationTimestamp); //calculate user account creation timestamp
 			const cliStatus = member.presence.clientStatus;
-			const currentDevice = member.user.bot 	? 'Bot' :
+			const currentDevice = !cliStatus		? null :
+								  member.user.bot 	? 'Bot' :
 								  cliStatus.desktop ? 'Desktop' : 
 								  cliStatus.web		? 'Web Browser' :
 								  cliStatus.mobile	? 'Mobile' :
@@ -98,7 +99,7 @@ module.exports = {
 				.addField(`ID:`, member.id, true)
 				.addField(`Server Booster?`, `${member.premiumSinceTimestamp ? 'Since ' + member.premiumSince.toLocaleString('en-US',{year:'numeric',month:'numeric',day:'numeric'}) + ' ' + member.premiumSince.toLocaleTimeString(undefined,{hour12:true}) + '\n(' + premiumSinceDays + ')'  : 'No'}`, true)
 				.addField(`Highest Role:`, member.roles.highest, true)
-				.addField(`Status`, `${status} on ${currentDevice}`, true)
+				.addField(`Status`, `${status}${currentDevice?' on '+currentDevice:''}`, true)
 				.addField(`Current Activity`, currentActivityString, true)
 				.addField(`Created Discord Account:`, `${accountCreationTime.toLocaleString('en-US',{year:'numeric',month:'numeric',day:'numeric'})} ${accountCreationTime.toLocaleTimeString(undefined,{hour12:true})}\n(${accountCreationTimeDays})`, true)
 				.addField(`Joined the Server:`, `${member.joinedAt.toLocaleString('en-US',{year:'numeric',month:'numeric',day:'numeric'})} ${member.joinedAt.toLocaleTimeString(undefined,{hour12:true})}\n(${joinedAtDays})`, true)

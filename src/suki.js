@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const USERS_PATTERN = /<@!?\d{17,18}>/i
 
-const { prefix, clientOptions, activity, clientStatus} = require('./components/config.json');
+const { prefix, clientOptions, activity, clientStatus, welcome} = require('./components/config.json');
 const { token } = require('./components/token.json');
 const permLevels = require('./components/permLevels.js');
 
@@ -13,21 +13,21 @@ const cleanReply = require('./util/cleanReply.js');
 const authorReply = require('./util/authorReply.js');
 const loadAllCommands = require('./util/loadAllCommands.js');
 
-const welcomeMessage = require('./welcome/welcomeMessage.js');
+const welcomeMessage = require('./features/welcomeMessage.js');
 
 const client = new Discord.Client(clientOptions);
 client.commands = new Discord.Collection();
 loadAllCommands(client, `${process.cwd()}/commands`);
 client.commands.delete(null);
 
-const levelCache = {};
+client.levelCache = {};
 for (let i = 0; i < permLevels.length; i++) 
 {
 	const thisLevel = permLevels[i];
-	levelCache[thisLevel.name] = thisLevel.level;
+	client.levelCache[thisLevel.name] = thisLevel.level;
 }
 
-const permlevel = (message) => {
+client.permlevel = (message) => {
 	let permlvl = 0;
 
 	const permOrder = permLevels.slice(0).sort((p, c) => p.level < c.level ? 1 : -1);
@@ -41,7 +41,7 @@ const permlevel = (message) => {
 		}
 	}
 	return permlvl;
-}
+};
 
 client.once('ready', async () => 
 {
@@ -52,7 +52,8 @@ client.once('ready', async () =>
 
 client.on('guildMemberAdd', async (member) => 
 {
-	await welcomeMessage(client,member);
+	const channel = member.guild.channels.resolve(welcome.channelTarget);
+	await channel.send(await welcomeMessage(client,member));
 });
 
 //this event triggers when a message is sent in a channel the bot has access to
@@ -77,27 +78,26 @@ client.on("message", async message =>
 		
 	if(args.join(' ') === '-h') return client.commands.get('help').execute(message,[command.name]);
 	
-	if(command.guildOnly && message.channel.type !== 'text') return message.channel.send(`This command cannot be executed in DMs!`);
+	if(command.guildOnly && message.channel.type !== 'text') return message.reply(`this command cannot be executed in DMs!`);
 	
-	if(command.dmOnly && message.channel.type !== 'dm') return cleanReply(message, `This command can only be executed in DMs!`);
+	if(command.dmOnly && message.channel.type !== 'dm') return cleanReply(message, `this command can only be executed in DMs!`);
 	
 	if((args.length==0 && command.args) || (args.length > 0 && command.noArgs))
 	{
-		let reply = `Invalid command syntax. Try sending me \`${prefix}${command.name} -h\` for help with this command`;
+		let reply = `invalid command syntax. Try sending me \`${prefix}${command.name} -h\` for help with this command`;
 		return cleanReply(message, reply, '20s');
 	}
 	
-	const level = permlevel(message);
-	if(level < levelCache[command.permLevel]) return cleanReply(message, `You don't have permission to use this command`);
+	const level = client.permlevel(message);
+	if(level < client.levelCache[command.permLevel]) return cleanReply(message, `you don't have permission to use this command`);
 	
 	try {
-		command.execute(message, args);
+		await command.execute(message, args);
 	} catch(e) {
-		console.error(e);
-		cleanReply(message, `There was an error trying to execute that command!`);
+		console.error(e.stack);
+		cleanReply(message, `there was an error trying to execute that command!`);
 	}
 });
-
 
 client.login(token);
 }
