@@ -1,7 +1,7 @@
 var fs = require('fs-extra');
 
-//[helper function] save to a JSON file. returns as function to allow easy usage with schedulers
-function recordFile(obj, path)
+//save an object to a properly formatted JSON file. Arrays are output on a single line (they aren't normally when using the spacing argument)
+function recordFileSync(obj, path)
 {
 	var objJson = JSON.stringify(obj,function(k,v){
 			if(v instanceof Array)
@@ -17,4 +17,4 @@ function recordFile(obj, path)
 	});
 }
 
-module.exports = recordFile;
+module.exports = recordFileSync;

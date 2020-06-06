@@ -1,18 +1,13 @@
 const parseTime = require('./parseTime.js');
 
-/*
-
- create a timed delay promise
- 
- */
+//create a promise that resolves after the specified amount of time
 function delay(timeToDelay)
 {
-	const timeInMilliseconds = parseTime(timeToDelay);
 	return new Promise(async (resolve,reject)=>
 	{
-		if(isNaN(timeInMilliseconds)) reject(false);
+		const timeInMilliseconds = parseTime(timeToDelay);
 		setTimeout(async function(){
-			resolve(true);
+			resolve();
 		}, timeInMilliseconds);
 	});
 }

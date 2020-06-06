@@ -1,8 +1,5 @@
 const isTimeFormat = require('./isTimeFormat.js');
-const parseTime = require('./parseTime.js');
-const millisecondsToString = require('./millisecondsToString.js');
 const replaceLast = require('./replaceLast.js');
-const stringFormatRegex = /^((?:\d+)(?=y))?((?:\d+)(?=w))?((?:\d+)(?=d))?((?:\d+)(?=h))?((?:\d+)(?=m))?((?:\d+)(?=s))?((?:\d+)(?=ms))?$/gi
 const unitSizes = {'l':0,'y':7,'w':6,'d':5,'h':4,'m':3,'s':2,'ms':1};
 
 function printTimePretty(readableTime, smallestUnit)
