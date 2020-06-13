@@ -12,7 +12,7 @@ function authorReply(message, input)
 		try {
 			await message.author.send(input);
 		} catch(e) {
-			cleanReply(`It looks like I can't DM you. Do you have DMs disabled?`);
+			cleanReply(message,`It looks like I can't DM you. Do you have DMs disabled?`);
 			reject(false);
 		}
 		resolve();
