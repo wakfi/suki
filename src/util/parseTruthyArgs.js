@@ -1,19 +1,23 @@
 const dashflagRegex = /(?<=\s|^)-[a-zA-Z]+(?=\s|$)/gi;
+const dashflag = '-';
 
 function parseTruthyArgs(args,keys,flags,options) 
 {
 	if(typeof options === 'undefined') options = {};
-	let flagRegex = options.flagRegex || dashflagRegex;
-	let flagPrefix = options.flagPrefix || `-`;
+	let flagPrefix = options.flagPrefix || dashflag;
+	let flagRegex = options.flagRegex || (options.flagMatching ? new RegExp(`(?<=\\s|^)${flagPrefix}${options.flagMatching}(?=\\s|$)`,`gi`) : dashflagRegex);
 	if(!(flagRegex instanceof RegExp)) throw new TypeError(`flagRegex must be a Regular Expression`);
 	if(keys.length != flags.length) throw new RangeError(`must have same number of keys and flags`);
 	const obj = {};
 	const allMatches = [...args.join(' ').matchAll(flagRegex)];
-	const found = allMatches.join('')
-							.split(flagPrefix)
+	const found = options.singleFlag || options.disableAutoPrefix ? 
+				  allMatches.join('')
+						    .split(flagPrefix) 
+							:
+				  allMatches.join('')
+						    .split(flagPrefix)
 							.join('')
-							.split('')
-							.map(splitval => splitval = `${flagPrefix}${splitval}`);
+							.split('');
 	let count = 0;
 	for(let i = 0; i < keys.length; i++)
 	{
