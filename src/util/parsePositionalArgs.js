@@ -17,11 +17,11 @@ function parsePositionalArgs(args,keys,flags,options)
 			const indexKey = args.indexOf(flag);
 			const nextFlagIndex = singlePosition ? 1 : args.slice(indexKey+1).findIndex(arg => flagRegex.test(arg));
 			const val = args.splice(indexKey+1, nextFlagIndex==-1 ? args.length : nextFlagIndex).join(' ');
-			Object.defineProperty(obj, key, {value: val, writable: true, enumerable: true, configurable: true});
+			Object.defineProperty(obj, key, {value: val, writable: false, enumerable: true, configurable: true});
 			args.splice(indexKey,1);
 		}
 	}
-	Object.defineProperty(obj, 'args', {value: args, writable: true, enumerable: true, configurable: true});
+	Object.defineProperty(obj, 'args', {value: args, writable: false, enumerable: true, configurable: true});
 	return obj;
 }
 

@@ -24,15 +24,15 @@ function parseTruthyArgs(args,keys,flags,options)
 			const indexKey = found.indexOf(flag);
 			found.splice(indexKey,1);
 			args.splice(args.indexOf(key),1);
-			Object.defineProperty(obj, key, {value: true, writable: true, enumerable: true, configurable: true});
+			Object.defineProperty(obj, key, {value: true, writable: false, enumerable: true, configurable: true});
 			count++;
 		} else {
-			Object.defineProperty(obj, key, {value: false, writable: true, enumerable: true, configurable: true});
+			Object.defineProperty(obj, key, {value: false, writable: false, enumerable: true, configurable: true});
 		}
 	}
-	Object.defineProperty(obj, 'args', {value: args, writable: true, enumerable: true, configurable: true});
-	Object.defineProperty(obj, 'found', {value: found, writable: true, enumerable: true, configurable: true});
-	Object.defineProperty(obj, 'count', {value: count, writable: true, enumerable: true, configurable: true});
+	Object.defineProperty(obj, 'args', {value: args, writable: false, enumerable: true, configurable: true});
+	Object.defineProperty(obj, 'found', {value: found, writable: false, enumerable: true, configurable: true});
+	Object.defineProperty(obj, 'count', {value: count, writable: false, enumerable: true, configurable: true});
 	return obj;
 }
 
