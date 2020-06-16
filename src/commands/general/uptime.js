@@ -31,7 +31,7 @@ module.exports = {
 		if(hours) uptimeArgs.push(`**${hours}** ${hours>1?'hours':'hour'}`);
 		if(mins) uptimeArgs.push(`**${mins}** ${mins>1?'minutes':'minute'}`);
 		if(secs) uptimeArgs.push(`**${secs}** ${secs>1?'seconds':'second'}`);
-		let uptimeString = `I have been running for ${uptimeArgs.join(', ')}`;
+		let uptimeString = `I have been online for ${uptimeArgs.join(', ')}`;
 		if(/,/.test(uptimeString))
 		{
 			if((uptimeString.match(/,/g) || []).length > 1)
