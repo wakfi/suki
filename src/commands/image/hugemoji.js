@@ -70,9 +70,17 @@ module.exports = {
 					const svgSecondDomain = `${twemojiDomain}${emojiInUnicode.slice(0,emojiInUnicode.lastIndexOf('-'))}.svg`;
 					githubResponseA = await rp(svgSecondDomain);
 				} catch(moreErr) {
-					//not an emoji. the condition is checking if its throwing a real error or just 404 not found
-					if(!JSON.stringify(moreErr).includes(`<!DOCTYPE html>`)) 
-						console.error(moreErr.stack)
+					//the number/digit emojis have the 'fe0f' codepoint in the middle but their twemoji urls don't for some reason
+					try {
+						const svgThirdDomain = `${twemojiDomain}${emojiInUnicode.split('fe0f-').join('')}.svg`;
+						githubResponseA = await rp(svgThirdDomain);
+					} catch(stillErr) {
+						//not an emoji. the conditional is checking if its throwing a real error or just 404 not found
+						if(!JSON.stringify(e).includes(`Response code 404 (Not Found)`))
+						{
+							console.error(e.stack);
+						}
+					}
 				}
 			}
 			//this is a syntax trick to quickly see if one of the attempts succeeded before continueing
