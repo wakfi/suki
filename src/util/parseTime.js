@@ -1,7 +1,6 @@
 const isTimeFormat = require('./isTimeFormat.js');
 
 /*
-
  parse time inputs with flexible syntax. accepts any mix of years, weeks, days, hours, minutes, seconds, milliseconds.
  does not accept months because how many days is a month anyways? why do you need that?
  
@@ -12,7 +11,6 @@ const isTimeFormat = require('./isTimeFormat.js');
  200ms
  1h30s
  15m30s
- 
 */
 function parseTime(timeToParse)
 {

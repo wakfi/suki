@@ -70,39 +70,47 @@ module.exports = {
 					const svgSecondDomain = `${twemojiDomain}${emojiInUnicode.slice(0,emojiInUnicode.lastIndexOf('-'))}.svg`;
 					githubResponseA = await rp(svgSecondDomain);
 				} catch(moreErr) {
-					//not an emoji. the condition is checking if its throwing a real error or just 404 not found
-					if(!JSON.stringify(moreErr).includes(`<!DOCTYPE html>`)) 
-						console.error(moreErr.stack)
+					//the number/digit emojis have the 'fe0f' codepoint in the middle but their twemoji urls don't for some reason
+					try {
+						const svgThirdDomain = `${twemojiDomain}${emojiInUnicode.split('fe0f-').join('')}.svg`;
+						githubResponseA = await rp(svgThirdDomain);
+					} catch(stillErr) {
+						//not an emoji. the conditional is checking if its throwing a real error or just 404 not found
+						if(!JSON.stringify(e).includes(`Response code 404 (Not Found)`))
+						{
+							console.error(e.stack);
+						}
+					}
 				}
 			}
 			//this is a syntax trick to quickly see if one of the attempts succeeded before continueing
-			githubResponseA && rp(githubResponseA.split(`<iframe class="render-viewer " src="`)[1].split('"')[0])
-			.then(async githubResponseB =>
+			if(githubResponseA) 
 			{
 				//emoji is a unicode emoji 
+				const githubResponseB = await rp(githubResponseA.split(`<iframe class="render-viewer " src="`)[1].split('"')[0]);
 				//the order here is: get svg image from remote (save local), convert to png (save local), send png, delete local svg and png
-				const emojiName = emojiMap[messageElement] ? emojiMap[messageElement][0] : emojiInUnicode;
+				const emojiName = emojiMap[messageElement][0] || emojiInUnicode;
 				const picFolder = `${process.cwd()}/file_dump`;
 				await fs.ensureDir(picFolder).catch(e=>{return console.error(e.stack)});
 				//data for vector image of emoji
 				const emojiSvg = await rp(githubResponseB.split('data-image  = "')[1].split('"')[0]);
-				await fs.outputFile(`${picFolder}${path.sep}${emojiInUnicode}.svg`,emojiSvg);
+				await fs.outputFile(`${picFolder}/${emojiInUnicode}.svg`,emojiSvg);
 				//convert from svg to png
 				await svgToPng.convert(path.join(picFolder,`${emojiInUnicode}.svg`), picFolder, {defaultWidth:722,defaultHeight:722},{type:"image/png"});
 				await message.channel.send({files: 
-					[{attachment: `${picFolder}${path.sep}${emojiInUnicode}.png`,
+					[{attachment: `${picFolder}/${emojiInUnicode}.png`,
 					name: `${emojiName}.png`}]
 				}).catch(err=>{console.error(`Error sending a message:\n\t${typeof err==='string'?err.split('\n').join('\n\t'):err.stack}`)});
 				//cleanup created files
-				await fs.remove(`${picFolder}${path.sep}${emojiInUnicode}.svg`)
+				await fs.remove(`${picFolder}/${emojiInUnicode}.svg`)
 				.catch(err => {
 					console.error(err.stack)
 				});
-				await fs.remove(`${picFolder}${path.sep}${emojiInUnicode}.png`)
+				await fs.remove(`${picFolder}/${emojiInUnicode}.png`)
 				.catch(err => {
 					console.error(err.stack)
 				});
-			});
+			}
 		}
 	}
 };

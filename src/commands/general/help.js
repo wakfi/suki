@@ -21,7 +21,7 @@ module.exports = {
 			if(syms === message.client.commands.get('welcomeConfig').wcfg) {wcfgOn=true; args.pop();return (cmd => !cmd.unlisted && cmd.category === 'welcome');}
 			return (cmd => truthy.allin || !cmd.unlisted);
 		})();
-		const truthy = parseTruthyArgs(args, ['allin'], ['-a']);
+		const truthy = parseTruthyArgs(args, ['allin'], ['a']);
 		const commands = message.client.commands.filter(filter).sorted((p, c) => message.client.levelCache[p.permLevel] - message.client.levelCache[c.permLevel] || (p.name < c.name ? -1 : 1));
 		if(args.length == 0)
 		{

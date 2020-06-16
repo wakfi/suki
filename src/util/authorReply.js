@@ -1,6 +1,6 @@
 const path = require('path');
 const Message = require((require.resolve('discord.js')).split(path.sep).slice(0, -1).join(path.sep) + `${path.sep}structures${path.sep}Message.js`);
-const cleanReply = require('./cleanReply.js');
+const selfDeleteReply = require('./selfDeleteReply.js');
 
 function authorReply(message, input)
 {
@@ -12,8 +12,8 @@ function authorReply(message, input)
 		try {
 			await message.author.send(input);
 		} catch(e) {
-			cleanReply(`It looks like I can't DM you. Do you have DMs disabled?`);
-			reject(false);
+			selfDeleteReply(message, `It looks like I can't DM you. Do you have DMs disabled?`);
+			reject();
 		}
 		resolve();
 	});
