@@ -1,7 +1,6 @@
 function main(){
 const Discord = require('discord.js');
 const fs = require('fs-extra');
-const path = require('path');
 const USERS_PATTERN = /<@!?\d{17,18}>/i
 
 const { prefix, clientOptions, activity, clientStatus, welcome} = require('./components/config.json');
@@ -9,6 +8,7 @@ const { token } = require('./components/token.json');
 const permLevels = require('./components/permLevels.js');
 
 const addTimestampLogs = require('./util/addTimestampLogs.js');
+const selfDeleteReply = require('./util/selfDeleteReply.js');
 const cleanReply = require('./util/cleanReply.js');
 const authorReply = require('./util/authorReply.js');
 const loadAllCommands = require('./util/loadAllCommands.js');
@@ -47,7 +47,7 @@ client.once('ready', async () =>
 {
 	client.user.setPresence({activity:activity, status: clientStatus.status});
 	addTimestampLogs();
-	console.log(`Suki has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds`);
+	console.log(`${client.user.username} has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds`);
 });
 
 client.on('guildMemberAdd', async (member) => 
@@ -67,7 +67,7 @@ client.on("message", async message =>
 	if(USERS_PATTERN.test(message.content) && message.content.startsWith(`${message.client.user}`))
 	{
 		args.shift(); //clear mention
-		if(args.length == 0) return cleanReply(message, `type \`${prefix}help\` to see a list commands`, `15s`);
+		if(args.length == 0) return cleanReply(message, `type \`${prefix}help\` to see a list commands`, `20s`);
 	}
 	const commandName = args.shift();
 	
@@ -78,24 +78,24 @@ client.on("message", async message =>
 		
 	if(args.join(' ') === '-h') return client.commands.get('help').execute(message,[command.name]);
 	
-	if(command.guildOnly && message.channel.type !== 'text') return message.reply(`this command cannot be executed in DMs!`);
+	if(command.guildOnly && message.channel.type !== 'text') return selfDeleteReply(message, `this command cannot be executed in DMs!`);
 	
-	if(command.dmOnly && message.channel.type !== 'dm') return cleanReply(message, `this command can only be executed in DMs!`);
+	if(command.dmOnly && message.channel.type !== 'dm') return selfDeleteReply(message, `this command can only be executed in DMs!`);
 	
 	if((args.length==0 && command.args) || (args.length > 0 && command.noArgs))
 	{
 		let reply = `invalid command syntax. Try sending me \`${prefix}${command.name} -h\` for help with this command`;
-		return cleanReply(message, reply, '20s');
+		return selfDeleteReply(message, reply, `20s`);
 	}
 	
 	const level = client.permlevel(message);
-	if(level < client.levelCache[command.permLevel]) return cleanReply(message, `you don't have permission to use this command`);
+	if(level < client.levelCache[command.permLevel]) return selfDeleteReply(message, `you don't have permission to use this command`);
 	
 	try {
 		await command.execute(message, args);
 	} catch(e) {
 		console.error(e.stack);
-		cleanReply(message, `there was an error trying to execute that command!`);
+		selfDeleteReply(message, `there was an error trying to execute that command!`);
 	}
 });
 
