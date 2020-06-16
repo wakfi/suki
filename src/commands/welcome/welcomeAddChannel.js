@@ -21,9 +21,11 @@ module.exports = {
 	args: true,
 	wcfgAliases: ['addChannel','adc'],
 	async execute(message, args) {
-		const keys = ['channelResolve','description']
-		const flags = ['-c','-d'];
-		const findEmoji = parsePositionalArgs(args, ['emoji','position'], ['-e','-p'], {singlePosition: true});
+		let keys = ['emoji','position'];
+		let flags = ['e','p'];
+		const findEmoji = parsePositionalArgs(args, keys, flags, {singlePosition: true});
+		keys = ['channelResolve','description'];
+		flags = ['c','d'];
 		const channelData = parsePositionalArgs(findEmoji.args, keys, flags);
 		const emoji = resolveMention(findEmoji.emoji, EMOJIS_PATTERN);
 		const position = findEmoji.position && !isNaN(findEmoji.position) ? Number(findEmoji.position)-1 : config.welcome.importantChannels.length;

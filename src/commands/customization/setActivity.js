@@ -5,7 +5,6 @@ const recordFile = require(`${process.cwd()}/util/recordFile.js`);
 const parsePositionalArgs = require(`${process.cwd()}/util/parsePositionalArgs.js`);
 const firstLetterCapital = require(`${process.cwd()}/util/firstLetterCapital.js`);
 const selfDeleteReply = require(`${process.cwd()}/util/selfDeleteReply.js`);
-//const flagRegex = /^-*$/;
 
 module.exports = {
 	name: 'setActivity',
@@ -17,7 +16,7 @@ module.exports = {
 	args: true,
 	async execute(message, args) {
 		const keys = ['application.id','name','type','url']
-		const flags = ['-a','-n','-t','-u'];
+		const flags = ['a','n','t','u'];
 		const newActivity = parsePositionalArgs(args, keys, flags);
 		if(!newActivity.name)
 		{
@@ -48,8 +47,8 @@ module.exports = {
 			})(args);
 			if(args.length == 0) return selfDeleteReply(message, `you must include activity text`, '15s');
 			const activityText = args.join(' ');
-			Object.defineProperty(newActivity, 'name', {value: activityText, writable: true, enumerable: true, configurable: true});
-			Object.defineProperty(newActivity, 'type', {value: type, writable: true, enumerable: true, configurable: true});
+			Object.defineProperty(newActivity, 'name', {value: activityText, writable: false, enumerable: true, configurable: true});
+			Object.defineProperty(newActivity, 'type', {value: type, writable: false, enumerable: true, configurable: true});
 		}
 		const type = (function(arg){ //switch expression workaround
 			switch(arg.toUpperCase())

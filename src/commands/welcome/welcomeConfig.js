@@ -20,7 +20,7 @@ module.exports = {
 	args: true,
 	wcfg: wcfgSym,
 	async execute(message, args) {
-		const tflags = ['-p','-a'];
+		const tflags = ['p','a'];
 		const tkeys = ['preview', 'allcmds'];
 		const truthy = parseTruthyArgs(args,tkeys,tflags);
 		if(truthy.preview && truthy.allcmds) return selfDeleteReply(message, 'flags `-p` and `-a` are mutually exclusive; you may only use one');
