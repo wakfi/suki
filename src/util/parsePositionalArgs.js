@@ -1,12 +1,16 @@
 const dashflagRegex = /(?<=\s|^)-[a-zA-Z]+(?=\s|$)/;
+const dashflag = '-';
 
 function parsePositionalArgs(args,keys,flags,options) 
 {
 	if(typeof options === 'undefined') options = {};
-	let flagRegex = options.flagRegex || dashflagRegex;
+	let flagPrefix = options.flagPrefix || dashflag;
+	let flagRegex = options.flagRegex || (options.flagMatching ? new RegExp(`(?<=\\s|^)${flagPrefix}${options.flagMatching}(?=\\s|$)`,`gi`) : dashflagRegex);
 	const singlePosition = options.singlePosition || false;
 	if(!(flagRegex instanceof RegExp)) throw new TypeError(`flagRegex must be a Regular Expression`);
 	if(keys.length != flags.length) throw new RangeError(`must have same number of keys and flags`);
+	const originalFlags = flags;
+	if(!options.disableAutoPrefix) flags = originalFlags.map(flag => flag = flagPrefix + flag);
 	const obj = {};
 	for(let i = 0; i < keys.length; i++)
 	{
