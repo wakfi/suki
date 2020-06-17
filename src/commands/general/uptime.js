@@ -1,6 +1,7 @@
 const path = require('path');
 const MessageEmbed = require((require.resolve('discord.js')).split(path.sep).slice(0, -1).join(path.sep) + `${path.sep}structures${path.sep}MessageEmbed.js`);
 const replaceLast = require(`${process.cwd()}/util/replaceLast.js`);
+const pad = require(`${process.cwd()}/util/padZeros.js`);
 
 module.exports = {
 	name: 'uptime',
@@ -9,10 +10,6 @@ module.exports = {
 	permLevel: 'User',
 	noArgs: true,
 	async execute(message, args) {
-		function pad(n, z) {
-			z = z || 1;
-			return ('00' + n).slice(-z);
-		}
 		let s = message.client.uptime;
 		let ms = s % 1000;
 		s = (s - ms) / 1000;
