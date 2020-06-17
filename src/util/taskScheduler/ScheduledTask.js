@@ -46,6 +46,35 @@ const parseMonthFromString = (month) => {
 
 class ScheduledTask
 { 
+	/** @lends ScheduledTask.prototype */
+	
+	/**
+	 * @typedef {Object} ScheduledTaskBuilderTimeDescription
+	 * @property {number} [year]
+	 * @property {number|string} [month]
+	 * @property {number} [date]
+	 * @property {number} [hours]
+	 * @property {number} [minutes]
+	 * @property {number} [seconds]
+	 * @property {number} [milliseconds]
+	 */
+	
+	/**
+	 * @typedef {Object} ScheduledTaskBuilderOptions
+	 * @property {string} [name]
+	 * @property {boolean} [recurring]
+	 * @property {string} [precision]
+	 * @property {Date} [endAt]
+	 * @property {totalOccurances} [number]
+	 * @property {at} [ScheduledTaskBuilderTimeDescription]
+	 * @property {end} [ScheduledTaskBuilderTimeDescription]
+	 */
+	
+	/**
+	 * @constructs
+	 * @param {Date|ScheduledTask|String} [arg]
+	 * @param {ScheduledTaskBuilderOptions|Date} [options]
+	 */
 	static build(arg,options)
 	{
 		if(arg instanceof String)
@@ -119,8 +148,8 @@ class ScheduledTask
 	
 	constructor(name,date,options)
 	{
-		Object.defineProperty(this, '_name', {value: name, writable:false, enumerable:true, configurable:false});
-		Object.defineProperty(this, '_schedule', {value: date, writable:false, enumerable:true, configurable:false});
+		/** @private */ Object.defineProperty(this, '_name', {value: name, writable:false, enumerable:false, configurable:false});
+		/** @private */ Object.defineProperty(this, '_schedule', {value: date, writable:false, enumerable:false, configurable:false});
 		/*
 		 Only the time components of the date matter for recurring
 		 tasks. For non-recurring tasks, the entire date matters
@@ -130,10 +159,10 @@ class ScheduledTask
 		Object.defineProperty(this, 'endAt', {value: options.endAt || null, writable:false, enumerable:true, configurable:false});
 		Object.defineProperty(this, 'totalOccurances', {value: options.totalOccurances || 0, writable:false, enumerable:true, configurable:false});
 		
-		this._hours = false;
-		this._minutes = false;
-		this._seconds = false;
-		this._milliseconds = false;
+		/** @private */ this._hours = false;
+		/** @private */ this._minutes = false;
+		/** @private */ this._seconds = false;
+		/** @private */ this._milliseconds = false;
 		switch(this.precision)
 		{
 			case 'milliseconds':
@@ -148,10 +177,10 @@ class ScheduledTask
 			default:
 				throw new SyntaxError(`unknown time precision: ${this.precision}`);
 		}
-		Object.defineProperty(this, '_hours', {writable:false, enumerable:true, configurable:false});
-		Object.defineProperty(this, '_minutes', {writable:false, enumerable:true, configurable:false});
-		Object.defineProperty(this, '_seconds', {writable:false, enumerable:true, configurable:false});
-		Object.defineProperty(this, '_milliseconds', {writable:false, enumerable:true, configurable:false});
+		Object.defineProperty(this, '_hours', {writable:false, enumerable:false, configurable:false});
+		Object.defineProperty(this, '_minutes', {writable:false, enumerable:false, configurable:false});
+		Object.defineProperty(this, '_seconds', {writable:false, enumerable:false, configurable:false});
+		Object.defineProperty(this, '_milliseconds', {writable:false, enumerable:false, configurable:false});
 		
 		Object.defineProperty(this, 'enabled', {value: false, writable:true, enumerable:true, configurable:false});		
 		if(this.recurring)
@@ -194,11 +223,19 @@ class ScheduledTask
 		return this._schedule;
 	}
 	
+	/**
+	 * @override
+	 * @return {string} String of when this task is scheduled
+	 */
 	toString()
 	{
 		return this.getSchedule();
 	}
 	
+	/**
+	 * @override
+	 * @return {string} Time remaining until this
+	 */
 	valueOf()
 	{
 		return this._schedule - Date.now();
