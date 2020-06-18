@@ -53,6 +53,14 @@ class Time
 	 */
 	static build(time,options,hour12)
 	{
+		if((time instanceof Date || typeof time === 'string' || typeof time === 'number') && (!options || typeof options === 'boolean'))
+		{			
+			if(typeof options === 'boolean') 
+			{
+				hour12 = options; 
+			}
+			return new Time(time,hour12);
+		}
 		if(typeof time === 'string') time = Time.parse(time);
 		if(typeof options === 'boolean') {hour12 = options; options = undefined;}
 		if(time instanceof Time && typeof options === 'string') options = Time.parse(options)._options;
@@ -74,6 +82,7 @@ class Time
 			if(!options.milliseconds) options.milliseconds = time.milliseconds;
 			if(!options.designator) options.designator = time.designator;
 			if(typeof options.hour12 === 'undefined') options.hour12 = time._hour12;
+			time = undefined;
 		}
 		return new Time(options,hour12);
 	}
@@ -162,6 +171,8 @@ class Time
 		 */
 		Object.defineProperty(this, '_options', {value: options});
 		
+		if(this._hour12 && this._designator === 'pm') {this._hour += 12; this._pm = true}
+		
 		Object.defineProperty(this, 'hours', {get(){ return this._hours }, set:this.setHours, enumerable: true, configurable: true});
 		Object.defineProperty(this, 'minutes', {get(){ return this._minutes }, set:this.setMinutes, enumerable: true, configurable: true});
 		Object.defineProperty(this, 'seconds', {get(){ return this._seconds }, set:this.setSeconds, enumerable: true, configurable: true});
@@ -202,12 +213,12 @@ class Time
 		const vals = [];
 		if(this._precision)
 		{
-			if(this._precision.hour) vals.push(pad(this._hours,2) || this._strict ? '' : pad('0',2));
+			if(this._precision.hour) vals.push(pad((this._pm?this._hours-12:this._hours),2) || this._strict ? '' : pad((this._hour12?'12':'0'),2));
 			if(this._precision.minute) vals.push(pad(this._minutes,2) ||(this._seconds || this._milliseconds) ? (this._strict && !this._hours ? '' : pad('0',2)) : '');
 			if(this._precision.second) vals.push(pad(this._seconds,2) || (this._milliseconds ? (this._strict && !this._hours && !this.minutes ? '' : pad('0',2)) : ''));
 			if(this._precision.millisecond) vals.push(pad((this._milliseconds || '0'),4));
 		} else {
-			vals.push(pad((this._hours || '0'),2);
+			vals.push(pad(((this._pm?this._hours-12:this._hours) || (this._hour12?'12':'0')),2);
 			vals.push(pad(this._minutes,2) ||(this._seconds || this._milliseconds) ? (this._strict && !this._hours ? '' : pad('0',2)) : '');
 			vals.push(pad(this._seconds,2) || (this._milliseconds ? pad('0',2) : ''));
 			vals.push(pad(this._milliseconds,4) || '');
@@ -225,3 +236,5 @@ class Time
 		return ms;
 	}
 }
+
+module.exports = Time;
