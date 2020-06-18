@@ -1,3 +1,4 @@
+const Time = require('./Time.js');
 const parseMonthFromString = (month) => {
 	if(typeof month !== 'string') return month;
 	const m = month.toLowerCase();
@@ -44,12 +45,12 @@ const parseMonthFromString = (month) => {
 	}
 };
 
-class ScheduledTask
+class ScheduledEvent
 { 
-	/** @lends ScheduledTask.prototype */
+	/** @lends ScheduledEvent.prototype */
 	
 	/**
-	 * @typedef {Object} ScheduledTaskBuilderTimeDescription
+	 * @typedef {Object} ScheduledEventBuilderTimeDescription
 	 * @property {number} [year]
 	 * @property {number|string} [month]
 	 * @property {number} [date]
@@ -60,39 +61,39 @@ class ScheduledTask
 	 */
 	
 	/**
-	 * @typedef {Object} ScheduledTaskBuilderOptions
+	 * @typedef {Object} ScheduledEventBuilderOptions
 	 * @property {string} [name]
 	 * @property {boolean} [recurring]
 	 * @property {string} [precision]
 	 * @property {Date} [endAt]
 	 * @property {totalOccurances} [number]
-	 * @property {at} [ScheduledTaskBuilderTimeDescription]
-	 * @property {end} [ScheduledTaskBuilderTimeDescription]
+	 * @property {at} [ScheduledEventBuilderTimeDescription]
+	 * @property {end} [ScheduledEventBuilderTimeDescription]
 	 */
 	
 	/**
 	 * @constructs
-	 * @param {Date|ScheduledTask|String} [arg]
-	 * @param {ScheduledTaskBuilderOptions|Date} [options]
+	 * @param {Date|Time|ScheduledEvent|String} [arg]
+	 * @param {ScheduledEventBuilderOptions|Date|Time} [options]
 	 */
 	static build(arg,options)
 	{
 		if(arg instanceof String)
 		{
 			let d;
-			if(options instanceof Date)
+			if(options instanceof Date || options instanceof Time)
 			{
 				d = options;
 				options = {};
-			} else if(options.date) {
-				d = options.date;
+			} else if(options.date || options.time) {
+				d = options.date || options.time;
 			} else if(!options.at) {
 				throw new SyntaxError('you must provide sufficient arguments to specifcy the name and timing of the task');
 			}
 			options.name = arg;
 			arg = d;
 		}
-		if(!(arg instanceof Date || arg instanceof ScheduledTask))
+		if(!(arg instanceof Date || arg instanceof Time || arg instanceof ScheduledEvent))
 		{
 			if(typeof arg === 'object')
 			{
@@ -105,11 +106,11 @@ class ScheduledTask
 			if(typeof arg === 'undefined') throw new SyntaxError('you must provide arguments to specifcy the name and timing of the task');
 			options = {};
 		}
-		const date = (arg instanceof Date) ? arg                   :
-		    (arg instanceof ScheduledTask) ? arg.getScheduleDate() :
-		    (options instanceof Date)      ? options               :
-		                                options.date || new Date() ;
-		if(arg instanceof ScheduledTask)
+		const date = (arg instanceof Date || arg instanceof Time)  ? arg                   :
+		    (options instanceof Date || options instanceof Time)   ? options               :
+		    (arg instanceof ScheduledEvent)                        ? arg.getScheduleDate() :
+		                                                        options.date || new Date() ;
+		if(arg instanceof ScheduledEvent)
 		{
 			if(!options.name) options.name = arg.getName();
 			if(!options.recurring) options.recurring = arg.recurring;
@@ -143,21 +144,33 @@ class ScheduledTask
 			options.endAt = endDate;
 		}
 		
-		return new ScheduledTask(options.name, date, options);
+		return new ScheduledEvent(options.name, date, options);
 	}
 	
 	constructor(name,date,options)
 	{
-		/** @private */ Object.defineProperty(this, '_name', {value: name, writable:false, enumerable:false, configurable:false});
-		/** @private */ Object.defineProperty(this, '_schedule', {value: date, writable:false, enumerable:false, configurable:false});
+		/** @private */ this._name = name;
+		if(date instanceof Date)
+		{
+			/** @private */ this._date = date;//Object.defineProperty(this, '_date', {value: date, writable:false, enumerable:false, configurable:false});
+		} else if(date instanceof Time) {
+			/** @private */ this._time = date;//Object.defineProperty(this, '_time', {value: date, writable:false, enumerable:false, configurable:false});
+		} else {
+			return NaN;
+		}
+		/** @private */ Object.defineProperty(this, '_schedule', {get(){ return this._date || this._time }, enumerable:true, configurable:true});
 		/*
 		 Only the time components of the date matter for recurring
-		 tasks. For non-recurring tasks, the entire date matters
+		 tasks. For non-recurring tasks, the entire date matters.
+		 If _time is given for a non-recurring occurance, it will be 
+		 redefined as the next Date to occur with the given Time.
+		 If _date is given for a recurring occurance, it will be 
+		 redefined as a Time using the time values of the given Date
 		 */
-		Object.defineProperty(this, 'recurring', {value: options.recurring || false, writable:false, enumerable:true, configurable:false});
-		Object.defineProperty(this, 'precision', {value: options.precision.toLowerCase() || 'seconds', writable:false, enumerable:true, configurable:false});
-		Object.defineProperty(this, 'endAt', {value: options.endAt || null, writable:false, enumerable:true, configurable:false});
-		Object.defineProperty(this, 'totalOccurances', {value: options.totalOccurances || 0, writable:false, enumerable:true, configurable:false});
+		this.recurring = options.recurring || false;
+		this.precision = options.precision.toLowerCase() || 'seconds';
+		this.endAt = options.endAt || null;
+		this.totalOccurances = options.totalOccurances || 0;
 		
 		/** @private */ this._hours = false;
 		/** @private */ this._minutes = false;
@@ -177,37 +190,64 @@ class ScheduledTask
 			default:
 				throw new SyntaxError(`unknown time precision: ${this.precision}`);
 		}
-		Object.defineProperty(this, '_hours', {writable:false, enumerable:false, configurable:false});
-		Object.defineProperty(this, '_minutes', {writable:false, enumerable:false, configurable:false});
-		Object.defineProperty(this, '_seconds', {writable:false, enumerable:false, configurable:false});
-		Object.defineProperty(this, '_milliseconds', {writable:false, enumerable:false, configurable:false});
 		
-		Object.defineProperty(this, 'enabled', {value: false, writable:true, enumerable:true, configurable:false});		
+		this.enabled = false;
+		Object.defineProperty(this, 'enabled', {get(){ return this._enabled }, enumerable:true, configurable:true});		
 		if(this.recurring)
 		{
-			this.enabled = true;
+			if(this._date)
+			{
+				this._time = new Time(this._date);
+				this._date = undefined;
+			}
+			this._enabled = true;
 		} else {
+			if(this._time)
+			{
+				const d = new Date();
+				const t = this._time;
+				if(t.hours) d.setHours(t.hours);
+				if(t.minutes) d.setMinutes(t.minutes);
+				if(t.seconds) d.setSeconds(t.seconds);
+				if(t.milliseconds) t.setMilliseconds(t.milliseconds);
+				if(d < new Date())
+				{
+					const oneDayInMilliseconds = 86400000;
+					d.setTime(d + oneDayInMilliseconds);
+				}
+				this._date = d;
+				this._time = undefined;
+			}
 			const initTime = new Date();
-			this.enabled = this._schedule > initTime;
+			this._enabled = this._schedule > initTime;
 		}
 	}
 	
 	enable()
 	{
-		this.enabled = true;
+		this._enabled = true;
 	}
 
 	disable()
 	{
-		this.enabled = false;
+		this._enabled = false;
 	}
 	
 	getName()
 	{
-		return this._name();
+		return this._name;
 	}
 	
 	getSchedule()
+	{
+		return this._schedule;
+	}
+	
+	/**
+	 * @override
+	 * @return {string} string version of when this event is scheduled
+	 */
+	toString()
 	{
 		if(this.recurring)
 		{
@@ -218,26 +258,14 @@ class ScheduledTask
 		}
 	}
 	
-	getScheduleDate()
-	{
-		return this._schedule;
-	}
-	
 	/**
 	 * @override
-	 * @return {string} String of when this task is scheduled
-	 */
-	toString()
-	{
-		return this.getSchedule();
-	}
-	
-	/**
-	 * @override
-	 * @return {string} Time remaining until this
+	 * @return {string} time remaining until this event occurs, in milliseconds
 	 */
 	valueOf()
 	{
 		return this._schedule - Date.now();
 	}
 }
+
+module.exports = ScheduledEvent;
