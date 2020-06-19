@@ -96,11 +96,6 @@ class Manager
 		});
 	}
 	
-	fetchSync(value, cache=true, id)
-	{
-		return this.fetch(value,cache,id,function(val=>{return val}),function(console.error));
-	}
-	
 	resolve(idOrInstance)
 	{
 		if(idOrInstance instanceof this.holds) return idOrInstance;
