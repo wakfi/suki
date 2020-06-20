@@ -1,4 +1,5 @@
 const Time = require('./Time.js');
+const { v4:uuid } = require('uuid');
 const parseMonthFromString = (month) => {
 	if(typeof month !== 'string') return month;
 	const m = month.toLowerCase();
@@ -66,9 +67,9 @@ class ScheduledEvent
 	 * @property {boolean} [recurring]
 	 * @property {string} [precision]
 	 * @property {Date} [endAt]
-	 * @property {totalOccurances} [number]
-	 * @property {at} [ScheduledEventBuilderTimeDescription]
-	 * @property {end} [ScheduledEventBuilderTimeDescription]
+	 * @property {number} [totalOccurances]
+	 * @property {ScheduledEventBuilderTimeDescription} [at]
+	 * @property {ScheduledEventBuilderTimeDescription} [end]
 	 */
 	
 	/**
@@ -76,8 +77,13 @@ class ScheduledEvent
 	 * @param {Date|Time|ScheduledEvent|String} [arg]
 	 * @param {ScheduledEventBuilderOptions|Date|Time} [options]
 	 */
-	static build(arg,options)
+	static build(arg,options,userID)
 	{
+		if(typeof arg === 'object' && typeof options === 'undefined')
+		{
+			options = arg;
+			arg = undefined;
+		}
 		if(arg instanceof String)
 		{
 			let d;
@@ -144,21 +150,30 @@ class ScheduledEvent
 			options.endAt = endDate;
 		}
 		
-		return new ScheduledEvent(options.name, date, options);
+		return new ScheduledEvent(options.name, date, options, author);
 	}
 	
-	constructor(name,date,options)
+	constructor(name,date,options,author)
 	{
+		if(options.id && options._semsig === true)
+		{
+			/// @private @readonly
+			this.id = options.id
+		} else {
+			/// @private @readonly
+			this.id = uuid();
+		}
 		/** @private */ this._name = name;
 		if(date instanceof Date)
 		{
-			/** @private */ this._date = date;//Object.defineProperty(this, '_date', {value: date, writable:false, enumerable:false, configurable:false});
+			/** @private */ this._date = date;
 		} else if(date instanceof Time) {
-			/** @private */ this._time = date;//Object.defineProperty(this, '_time', {value: date, writable:false, enumerable:false, configurable:false});
+			/** @private */ this._time = date;
 		} else {
 			return NaN;
 		}
 		/** @private */ Object.defineProperty(this, '_schedule', {get(){ return this._date || this._time }, enumerable:true, configurable:true});
+		this.author = author;
 		/*
 		 Only the time components of the date matter for recurring
 		 tasks. For non-recurring tasks, the entire date matters.
