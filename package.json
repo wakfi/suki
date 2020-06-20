@@ -21,6 +21,9 @@
     "emoji-unicode": "^2.0.0",
     "fs-extra": "^9.0.1",
     "got": "^11.3.0",
-    "svg-to-png": "^4.0.0"
+    "sequelize": "^5.21.13",
+    "sqlite3": "^4.2.0",
+    "svg-to-png": "^4.0.0",
+    "uuid": "^8.1.0"
   }
 }
