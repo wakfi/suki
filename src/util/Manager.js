@@ -43,57 +43,47 @@
 
 
 const Collection = require('@discordjs/collection');
+const Sequelize = require('sequelize');
 
 /**
  * @abstract
  */
 class Manager
 {
-	constructor(client,iterable,holds,cacheType=Collection,...cacheArgs,dbpath)
+	constructor(client,iterable,holds,cacheType=Collection,...cacheArgs,dbname='database')
 	{
 		/** @readonly */ this.client = client;
 		/** @readonly */ this.holds = holds;
 		this.cacheType = cacheType;
 		this.cache = new cacheType(...cacheArgs);
-		/** @private @readonly */ this._dbpath = dbpath;
+		/** @private @readonly */ this._db = new Sequelize(dbname,'user','password', {
+			host: 'localhost',
+			dialect: 'sqlite',
+			logging: false,
+			storage: `${dbname}.sqlite`
+		});
 		if(iterable) for(const it of iterable) this.add(i);
 	}
 	
-	add(value, cache=true, { id, extras = [] })
+	_addHandler(value, cache=true, { id, extras = [] })
 	{
 		const exists = this.cache.get(id || value.id);
 		if(exists)
 		{
-			this.remove(exists.id);
-			return this.add(exists.id);
+			this._removeHandler(exists.id,cache);
+			return this._addHandler(exists.id,cache);
 		}
 		const entry = value instanceof this.holds ? value : new this.holds(value, ...extras);
-		//add to database
 		if(cache) this.cache.set(id || entry.id, entry);
 		return entry;
 	}
 	
-	remove(value, fromCache=true, id)
+	_removeHandler(value, fromCache=true, id)
 	{
 		const exists = this.cache.get(id || value.id);
 		if(!exists) return null;
-		//remove from database
 		if(fromCache) this.cache.delete(id || exists.id);
 		return exists;
-	}
-	
-	fetch(value, cache=true, id, callback, error)
-	{
-		return new Promise(async (resolve, reject) =>
-		{
-			if(callback) resolve = callback;
-			if(error) reject = error;
-			//const entry = await database query
-			if(!entry) resolve(null);
-			//reconstruct into object of this.holds?
-			if(cache) this.cache.set(entry.id || id, entry);
-			resolve(entry);
-		});
 	}
 	
 	resolve(idOrInstance)
