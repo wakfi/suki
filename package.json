@@ -4,6 +4,8 @@
   "description": "Custom Discord bot",
   "main": "src/suki.js",
   "scripts": {
+    "generate": "yarn prisma generate",
+    "prepare": "yarn generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
