@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model MUser {
+  id               String           @id @default(cuid())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  birthday         DateTime
+  discordId        String
+  tag              String
+  preferredName    String?
+  guilds           UserGuildPivot[]
+}
+
+model MGuild {
+  id        String           @id @default(cuid())
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  discordId String
+  users     UserGuildPivot[]
+}
+
+model UserGuildPivot {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  enabled   Boolean  @default(false)
+  userId    String
+  user      MUser    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  guildId   String
+  guild     MGuild   @relation(fields: [guildId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}

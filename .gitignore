@@ -109,3 +109,8 @@ dist
 .tern-port
 .yarn
 .pnp.cjs
+.env
+
+# SQLite3 database file
+*.db
+*.db-journal
