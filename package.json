@@ -19,8 +19,9 @@
   "dependencies": {
     "discord.js": "^14.2.0",
     "emoji-unicode": "^2.0.1",
-    "fs-extra": "^10.0.0",
-    "got": "^11.8.2",
+    "fs-extra": "^10.1.0",
+    "node-fetch": "^2.6.7",
     "svg-to-png": "^4.0.0"
-  }
+  },
+  "packageManager": "yarn@3.2.2"
 }
