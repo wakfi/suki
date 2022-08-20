@@ -16,11 +16,11 @@ interface ApplicationCommandConstructOptions {
   name: string;
   type: ApplicationCommandType | ApplicationCommandOptionType.Subcommand;
   description: string;
-  dm_permission?: boolean;
+  dmPermission?: boolean;
   premium?: boolean;
   subCommands?: ApplicationSubCommandClass[];
-  client_permissions?: PermissionString[];
-  command_permissions?: PermissionString[];
+  clientPermissions?: PermissionString[];
+  commandPermissions?: PermissionString[];
   options?: (APIApplicationCommandOption & Pick<any, any>)[] | null;
   devOnly?: boolean;
   ownerOnly?: boolean;
@@ -35,12 +35,12 @@ export default class ApplicationCommand {
     | ApplicationCommandOptionType.Subcommand;
   public readonly name: string;
   public readonly description: string;
-  public readonly dm_permission: boolean;
-  public readonly default_member_permissions: string | null;
+  public readonly dmPermission: boolean;
+  public readonly defaultMemberPermissions: string | null;
   public readonly premium: boolean;
   public readonly subCommands: ApplicationSubCommand[];
-  public readonly command_permissions: PermissionString[];
-  public readonly client_permissions: PermissionString[];
+  public readonly commandPermissions: PermissionString[];
+  public readonly clientPermissions: PermissionString[];
   public options: APIApplicationCommandOption[];
   public readonly devOnly: boolean;
   public readonly ownerOnly: boolean;
@@ -51,11 +51,11 @@ export default class ApplicationCommand {
       type,
       name,
       description,
-      dm_permission = false,
+      dmPermission = false,
       premium = false,
       subCommands = [],
-      client_permissions = [],
-      command_permissions = [],
+      clientPermissions = [],
+      commandPermissions = [],
       options,
       devOnly = false,
       ownerOnly = false,
@@ -65,12 +65,12 @@ export default class ApplicationCommand {
     this.type = type;
     this.name = name;
     this.description = description;
-    this.dm_permission = dm_permission;
-    this.command_permissions = command_permissions;
+    this.dmPermission = dmPermission;
+    this.commandPermissions = commandPermissions;
     this.premium = premium;
     this.subCommands = subCommands?.map((sc) => new sc(this.client, this));
-    this.client_permissions = client_permissions;
-    this.default_member_permissions = this.computePermissions();
+    this.clientPermissions = clientPermissions;
+    this.defaultMemberPermissions = this.computePermissions();
     // @ts-expect-error
     this.options = options;
     this.devOnly = devOnly;
@@ -78,14 +78,14 @@ export default class ApplicationCommand {
   }
 
   public validateClientPermissions(interaction: CommandInteraction): string {
-    const missing = this.client_permissions.filter(
+    const missing = this.clientPermissions.filter(
       (permission) => !interaction.guild?.me?.permissions.has(permission)
     );
     return missing.join(", ");
   }
 
   private computePermissions(): string | null {
-    const permsBigInt = this.command_permissions.reduce(
+    const permsBigInt = this.commandPermissions.reduce(
       (acc, perm) => acc | Permissions.FLAGS[perm],
       0n
     );

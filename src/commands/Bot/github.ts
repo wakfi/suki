@@ -5,27 +5,37 @@ import ApplicationCommand from "../../structures/ApplicationCommand";
 import { ApplicationCommandType } from "discord-api-types/v9";
 
 export default class GitHub extends ApplicationCommand {
-	constructor(client: BulbBotClient, name: string) {
-		super(client, {
-			name,
-			type: ApplicationCommandType.ChatInput,
-			description: "Return a link to the GitHub repository",
-			client_permissions: ["EMBED_LINKS"],
-		});
-	}
+  constructor(client: BulbBotClient, name: string) {
+    super(client, {
+      name,
+      type: ApplicationCommandType.ChatInput,
+      description: "Return a link to the GitHub repository",
+      clientPermissions: ["EMBED_LINKS"],
+    });
+  }
 
-	public async run(interaction: CommandInteraction): Promise<void> {
-		const embed: MessageEmbed = new MessageEmbed()
-			.setColor(embedColor)
-			.setDescription(await this.client.bulbutils.translate("github_source_code", interaction.guild?.id, {}))
-			.setFooter({
-				text: await this.client.bulbutils.translate("global_executed_by", interaction.guild?.id, {
-					user: interaction.user,
-				}),
-				iconURL: interaction.user.avatarURL({ dynamic: true }) || "",
-			})
-			.setTimestamp();
+  public async run(interaction: CommandInteraction): Promise<void> {
+    const embed: MessageEmbed = new MessageEmbed()
+      .setColor(embedColor)
+      .setDescription(
+        await this.client.bulbutils.translate(
+          "github_source_code",
+          interaction.guild?.id,
+          {}
+        )
+      )
+      .setFooter({
+        text: await this.client.bulbutils.translate(
+          "global_executed_by",
+          interaction.guild?.id,
+          {
+            user: interaction.user,
+          }
+        ),
+        iconURL: interaction.user.avatarURL({ dynamic: true }) || "",
+      })
+      .setTimestamp();
 
-		await interaction.reply({ embeds: [embed] });
-	}
+    await interaction.reply({ embeds: [embed] });
+  }
 }

@@ -38,18 +38,6 @@ export default class extends Event {
 
       await command?.run(interaction);
     } else if (interaction.isCommand()) {
-      if (!interaction.inGuild()) {
-        await interaction.reply({
-          content: await this.client.bulbutils.translate(
-            "event_interaction_dm_command",
-            "742094927403679816",
-            {}
-          ),
-          ephemeral: true,
-        });
-        return;
-      }
-
       const guild =
         interaction.guild ||
         (await this.client.bulbfetch.getGuild(interaction.guildId));
@@ -73,19 +61,10 @@ export default class extends Event {
             subCommand.name === interaction.options.getSubcommand(false)
         );
 
-        await loggingManager.sendCommandLog(
-          this.client,
-          guild,
-          interaction.user,
-          interaction.channelId,
-          `/${command.name} ${interaction.options.getSubcommand(false)}`
-        );
-
         if (subCommand) return subCommand.run(interaction);
       }
 
       const missing = command.validateClientPermissions(interaction);
-      const { premiumGuild } = await databaseManager.getConfig(guild);
 
       if (command.devOnly && !developers.includes(interaction.user.id))
         return interaction.reply({
@@ -93,35 +72,11 @@ export default class extends Event {
           ephemeral: true,
         });
 
-      if (!premiumGuild && command.premium)
-        return interaction.reply({
-          content: await this.client.bulbutils.translate(
-            "global_premium_only",
-            guild.id,
-            {}
-          ),
-          ephemeral: true,
-        });
-
       if (missing)
         return interaction.reply({
-          content: await this.client.bulbutils.translate(
-            "global_missing_permissions_bot",
-            guild.id,
-            { missing }
-          ),
+          content: `The bot is missing crucial permissions to perform this command. Please check the bot's permissions.\n**Missing permissions:** \`${missing}\``,
           ephemeral: true,
         });
-
-      commandUsage(command);
-
-      await loggingManager.sendCommandLog(
-        this.client,
-        guild,
-        interaction.user,
-        interaction.channelId,
-        `/${command.name}`
-      );
 
       // Should we add a .catch to handle uncaught errors thrown in command run methods?
       await command.run(interaction);

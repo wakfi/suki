@@ -39,8 +39,8 @@ export async function registerSlashCommands(client: BulbBotClient) {
         name: command.name,
         type: command.type as ApplicationCommandType,
         description: command.description,
-        default_member_permissions: command.default_member_permissions,
-        dm_permission: command.dm_permission,
+        default_member_permissions: command.defaultMemberPermissions,
+        dm_permission: command.dmPermission,
         options: command.options,
       };
 
