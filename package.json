@@ -6,7 +6,12 @@
   "scripts": {
     "db:migrate": "yarn prisma migrate dev",
     "generate": "yarn prisma generate",
+    "prestart": "tsc",
     "prepare": "yarn generate",
+    "start": "node build/src/index.js",
+    "fullstart": "yarn clean && yarn prestart && yarn start",
+    "dev": "nodemon -w src -w tsconfig.json -w package.json -w types.d.ts -e ts,js,json,env --exec \\\"yarn\\\" -i src/languages/en-US.json -- fullstart",
+    "clean": "test -d ./build && rm -r ./build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,7 +30,7 @@
     "discord.js": "^13.8.0",
     "dotenv": "^16.0.1",
     "moment": "^2.29.4",
-    "node-fetch": "^3.2.10",
+    "node-fetch": "^2.6.7",
     "prisma": "^4.2.1",
     "shelljs": "^0.8.5",
     "sqlite3": "^5.0.11",
@@ -34,6 +39,7 @@
   "packageManager": "yarn@3.2.2",
   "devDependencies": {
     "@types/node": "^18.7.7",
+    "nodemon": "^2.0.19",
     "typescript": "^4.7.4"
   }
 }

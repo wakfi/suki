@@ -20,7 +20,7 @@ export default class Event {
   }
 
   private static bootstrap(event: Event) {
-    event.emitter[event.type](name, async (...args: any) => {
+    event.emitter[event.type](event.name, async (...args: any) => {
       try {
         await event.run(...args);
       } catch (err: any) {

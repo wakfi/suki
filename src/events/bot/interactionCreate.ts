@@ -1,7 +1,7 @@
 import Event from "../../structures/Event";
 import { Interaction } from "discord.js";
 import { developers } from "../../Config";
-import { bulbfetch } from "src/utils/BulbBotFetch";
+import { bulbfetch } from "../../utils/BulbBotFetch";
 
 export default class extends Event {
   constructor(...args: any[]) {

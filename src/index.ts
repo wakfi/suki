@@ -2,7 +2,7 @@ import * as Config from "./Config";
 import BulbBotClient from "./structures/BulbBotClient";
 import * as env from "dotenv";
 
-env.config({ path: `${__dirname}/../.env` });
+env.config({ path: `${__dirname}/../../.env` });
 
 const config = {
   token: process.env.TOKEN,

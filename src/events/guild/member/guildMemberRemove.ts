@@ -1,6 +1,6 @@
 import Event from "../../../structures/Event";
 import { GuildMember } from "discord.js";
-import prisma from "@db/prisma";
+import prisma from "../../../prisma";
 
 export default class GuildMemberRemove extends Event {
   constructor(...args: any[]) {

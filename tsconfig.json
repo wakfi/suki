@@ -23,11 +23,7 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "paths": {
-      "@db/prisma": ["./src/prisma.ts"],
-      "src/*": ["./src/*"]
-    },
-    "baseUrl": "."
+    "baseUrl": "src"
   },
   "exclude": ["node_modules"],
   "include": [

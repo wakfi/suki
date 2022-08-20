@@ -1,7 +1,7 @@
 import Event from "../../../structures/Event";
 import { GuildMember } from "discord.js";
 import { tryIgnore } from "../../../utils/helpers";
-import prisma from "@db/prisma";
+import prisma from "../../../prisma";
 
 export default class extends Event {
   constructor(...args: any[]) {

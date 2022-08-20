@@ -86,6 +86,6 @@ export async function registerSlashCommands(client: BulbBotClient) {
     );
 
   client.log.info(
-    `[APPLICATION COMMANDS] Registered all of the slash commands, amount: ${response?.data?.length}`
+    `[APPLICATION COMMANDS] Registered all of the slash commands, amount: ${response.length}`
   );
 }

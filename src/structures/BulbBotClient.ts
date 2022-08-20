@@ -13,7 +13,7 @@ import ClientException from "./exceptions/ClientException";
 import Event from "./Event";
 import Util from "./Util";
 import BulbBotUtils from "../utils/BulbBotUtils";
-import Config from "src/Config";
+import Config from "../Config";
 import { logger } from "../utils/Logger";
 import BulbBotFetch from "../utils/BulbBotFetch";
 import ApplicationCommand from "./ApplicationCommand";

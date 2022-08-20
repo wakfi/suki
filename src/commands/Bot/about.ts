@@ -1,14 +1,17 @@
 import {
   MessageEmbed,
-  MessageActionRow,
-  MessageButton,
+  // MessageActionRow,
+  // MessageButton,
   CommandInteraction,
+  Message,
 } from "discord.js";
-import { botInvite, embedColor, supportInvite } from "../../Config";
+import {
+  /* botInvite, */ embedColor /* , supportInvite */,
+} from "../../Config";
 import BulbBotClient from "../../structures/BulbBotClient";
 import ApplicationCommand from "../../structures/ApplicationCommand";
 import { ApplicationCommandType } from "discord-api-types/v9";
-import * as packageJson from "package.json";
+import * as packageJson from "../../../package.json";
 
 export default class About extends ApplicationCommand {
   constructor(client: BulbBotClient, name: string) {
@@ -21,31 +24,30 @@ export default class About extends ApplicationCommand {
   }
 
   public async run(interaction: CommandInteraction): Promise<void> {
+    await interaction.reply("Pong");
+    const initReply = await interaction.fetchReply();
+    const reply: Message =
+      // @ts-expect-error
+      initReply instanceof Message ? initReply : new Message(initReply);
     const realCommitTime: string = this.client.bulbutils.formatDays(
       new Date(this.client.about.build.time.slice(0, -7))
     );
     const latency: number = Math.floor(
-      Date.now() - interaction.createdTimestamp
+      reply.createdTimestamp - interaction.createdTimestamp
     );
     const apiLatency: number = Math.round(this.client.ws.ping);
 
-    const row = new MessageActionRow().addComponents([
-      new MessageButton()
-        .setLabel("Invite")
-        .setStyle("LINK")
-        .setEmoji("🔗")
-        .setURL(botInvite),
-      new MessageButton()
-        .setLabel("Support")
-        .setStyle("LINK")
-        .setEmoji("❤️")
-        .setURL(supportInvite),
-      new MessageButton()
-        .setLabel("Source Code")
-        .setStyle("LINK")
-        .setEmoji("💾")
-        .setURL("https://github.com/wakfi/suki"),
-    ]);
+    // const row = new MessageActionRow().addComponents([
+    //   new MessageButton().setLabel("Invite").setStyle("LINK").setEmoji("🔗"),
+    //   // .setURL(botInvite),
+    //   new MessageButton().setLabel("Support").setStyle("LINK").setEmoji("❤️"),
+    //   // .setURL(supportInvite),
+    //   new MessageButton()
+    //     .setLabel("Source Code")
+    //     .setStyle("LINK")
+    //     .setEmoji("💾")
+    //     .setURL("https://github.com/wakfi/suki"),
+    // ]);
 
     let desc = [
       `**__Suki Information__**`,
@@ -57,7 +59,6 @@ export default class About extends ApplicationCommand {
       `**Ping:** \`${latency} ms\``,
       `**API Latency:** \`${apiLatency} ms\``,
       "",
-
       `The current uptime is **${this.client.bulbutils.getUptime(
         this.client.uptime
       )}**`,
@@ -75,6 +76,12 @@ export default class About extends ApplicationCommand {
       })
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed], components: [row] });
+    await interaction.editReply({
+      content: null,
+      embeds: [embed],
+      components: [
+        /* row */
+      ],
+    });
   }
 }
