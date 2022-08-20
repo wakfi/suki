@@ -13,12 +13,15 @@ export default class extends Event {
 
   async run(interaction: Interaction): Promise<void> {
     if (interaction.isSelectMenu()) {
-      if (interaction.customId === "infraction")
-        await infraction(this.client, interaction);
-      else if (interaction.customId === "reminders")
-        await reminders(this.client, interaction);
+      const menuHandler = this.client.interactions.get(interaction.customId);
+      if (!menuHandler) {
+        return console.error(
+          `Missing select menu handler for ${interaction.customId}`
+        );
+      }
+      await menuHandler(this.client, interaction);
     } else if (interaction.isContextMenu()) {
-      const member = await this.client.bulbfetch.getGuildMember(
+      const member = await bulbfetch(
         interaction.guild?.members,
         interaction.targetId
       );

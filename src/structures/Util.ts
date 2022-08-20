@@ -4,8 +4,6 @@ import BulbBotClient from "./BulbBotClient";
 import { promisify } from "util";
 import glob from "glob";
 import Event from "./Event";
-import CommandException from "./exceptions/CommandException";
-import ApplicationCommand from "./ApplicationCommand";
 import EventException from "./exceptions/EventException";
 
 const globAsync = promisify(glob);
@@ -21,30 +19,12 @@ export default class {
     return `${dirname(require.main?.filename || ".")}${sep}`;
   }
 
-  async loadCommands(): Promise<void> {
-    this.client.log.client(
-      "[CLIENT - COMMANDS] Started registering commands..."
-    );
-    const total = await loadAndConstruct<ApplicationCommand>({
-      client: this.client,
-      pathspec: `${this.directory}events/**/*.js`,
-      test: (item) => item instanceof ApplicationCommand,
-      onLoad: (item) => this.client.commands.set(item.name, item),
-      onError: (type, item, path) => {
-        throw new CommandException(errMessages[type](item.name, "commands"));
-      },
-    });
-    this.client.log.client(
-      `[CLIENT - COMMANDS] Successfully registered all ${total} commands`
-    );
-  }
-
   async loadEvents(): Promise<void> {
     this.client.log.client("[CLIENT - EVENTS] Started registering events...");
     const total = await loadAndConstruct<Event>({
       client: this.client,
       pathspec: `${this.directory}events/**/*.js`,
-      test: (event) => event instanceof Event,
+      test: (event) => isClass(event) && event instanceof Event,
       onLoad: (event, data) => {
         this.client.events.set(event.name, event);
         event.emitter[event.type](name, async (...args: any) => {
@@ -79,6 +59,37 @@ export default class {
         time: exec(`git log -1 --format=%cd`, { silent: true }).stdout,
       },
     };
+  }
+
+  async loadDir<C extends Constructable>(
+    dirname: string,
+    ParentClass?: Nullable<C>
+  ): Promise<void> {
+    this.client.log.client(
+      `[CLIENT - ${dirname.toUpperCase()}] Started registering ${dirname}...`
+    );
+    const total = await loadAndConstruct<C>({
+      client: this.client,
+      pathspec: `${this.directory}${dirname}/**/*.js`,
+      test: isClass(ParentClass)
+        ? (item) => item instanceof ParentClass
+        : undefined,
+      onLoad: (item) => this.client[dirname].set(item.name, item),
+      onError: (type, item) => {
+        throw new Error(errMessages[type](item.name, dirname));
+      },
+    });
+    this.client.log.client(
+      `[CLIENT - ${dirname.toUpperCase()}] Successfully registered all ${total} ${dirname}`
+    );
+  }
+
+  async loadDirList(dirs: string[] | Record<string, Maybe<Constructable>>) {
+    return await Promise.all(
+      Array.isArray(dirs)
+        ? dirs.map((dirname) => this.loadDir(dirname))
+        : Object.entries(dirs).map((entry) => this.loadDir(...entry))
+    );
   }
 }
 
@@ -134,16 +145,10 @@ export async function loadAndConstruct<V = LoadableClass>({
     delete require.cache[filePath];
     const { name } = parse(filePath);
     const LoadedFile: { default: Constructable<V> } = await import(filePath);
-    if (!isClass(LoadedFile.default)) {
-      await onError(
-        FileLoadExceptionType.DEFAULT_EXPORT_NOT_CLASS,
-        LoadedFile.default as unknown as V,
-        filePath
-      );
-      continue;
-    }
 
-    const instance = new LoadedFile.default(client, name);
+    const instance = isClass(LoadedFile.default)
+      ? new LoadedFile.default(client, name)
+      : LoadedFile.default;
     if (!test(instance)) {
       await onError(FileLoadExceptionType.TEST_FAILED, instance, filePath);
       continue;
@@ -156,7 +161,7 @@ export async function loadAndConstruct<V = LoadableClass>({
   return count;
 }
 
-function isClass(input: any): boolean {
+function isClass(input: any): input is Constructable {
   return (
     typeof input === "function" &&
     typeof input.prototype === "object" &&
@@ -164,4 +169,4 @@ function isClass(input: any): boolean {
   );
 }
 
-type Constructable<C> = new (...args: any[]) => C;
+type Constructable<C = any> = new (...args: any[]) => C;

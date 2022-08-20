@@ -7,6 +7,7 @@ import {
   PermissionString,
   Options,
   Sweepers,
+  SelectMenuInteraction,
 } from "discord.js";
 import ClientException from "./exceptions/ClientException";
 import Event from "./Event";
@@ -22,6 +23,10 @@ export default class BulbBotClient extends Client {
   public commands: Collection<string, ApplicationCommand>;
   public aliases: Collection<string, string>;
   public events: Collection<string, Event>;
+  public interactions: Collection<
+    string,
+    (client: BulbBotClient, interaction: SelectMenuInteraction) => any
+  >;
   public defaultPerms!: Readonly<BitField<PermissionString, bigint>>;
   private readonly utils: Util;
   public readonly bulbutils: BulbBotUtils;
@@ -61,6 +66,7 @@ export default class BulbBotClient extends Client {
     this.aliases = new Collection();
 
     this.events = new Collection();
+    this.interactions = new Collection();
 
     this.utils = new Util(this);
     this.bulbutils = new BulbBotUtils(this);
@@ -85,9 +91,12 @@ export default class BulbBotClient extends Client {
   }
 
   public async login(token = this.token): Promise<any> {
-    await this.utils.loadEvents();
-    await this.utils.loadCommands();
     await this.utils.loadAbout();
+    await this.utils.loadEvents();
+    await this.utils.loadDirList({
+      commands: ApplicationCommand,
+      interactions: null,
+    });
 
     await super.login(token as string);
   }
