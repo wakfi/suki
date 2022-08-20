@@ -1,0 +1,107 @@
+import * as path from "path";
+import { cd, exec } from "shelljs";
+import BulbBotClient from "./BulbBotClient";
+import { promisify } from "util";
+import glob from "glob";
+import Event from "./Event";
+import EventException from "./exceptions/EventException";
+import CommandException from "./exceptions/CommandException";
+import ApplicationCommand from "./ApplicationCommand";
+
+const globAsync = promisify(glob);
+
+export default class {
+  private readonly client: BulbBotClient;
+
+  constructor(client: BulbBotClient) {
+    this.client = client;
+  }
+
+  isClass(input: any): boolean {
+    return (
+      typeof input === "function" &&
+      typeof input.prototype === "object" &&
+      input.toString().substring(0, 5) === "class"
+    );
+  }
+
+  get directory(): string {
+    return `${path.dirname(require.main?.filename || ".")}${path.sep}`;
+  }
+
+  async loadCommands(): Promise<void> {
+    this.client.log.client(
+      "[CLIENT - COMMANDS] Started registering commands..."
+    );
+    return globAsync(`${this.directory}commands/*/*.js`).then(
+      (commands: any) => {
+        for (const commandFile of commands) {
+          delete require.cache[commandFile];
+          const { name } = path.parse(commandFile);
+          const File = require(commandFile);
+          if (!this.isClass(File.default))
+            throw new CommandException(
+              `Command ${name} is not an instance of Command`
+            );
+
+          const command = new File.default(this.client, name);
+          if (!(command instanceof ApplicationCommand))
+            throw new CommandException(
+              `Command ${name} doesn't belong in commands!`
+            );
+
+          this.client.commands.set(command.name, command);
+        }
+        this.client.log.client(
+          "[CLIENT - COMMANDS] Successfully registered all commands"
+        );
+      }
+    );
+  }
+
+  async loadEvents(): Promise<void> {
+    this.client.log.client("[CLIENT - EVENTS] Started registering events...");
+    return globAsync(`${this.directory}events/**/*.js`).then((events: any) => {
+      for (const eventFile of events) {
+        delete require.cache[eventFile];
+        const { name } = path.parse(eventFile);
+        const File = require(eventFile);
+        if (!this.isClass(File.default))
+          throw new EventException(`Event ${name} is not an instance of Event`);
+
+        const event = new File.default(this.client, name);
+        if (!(event instanceof Event))
+          throw new EventException(`Event ${name} doesn't belong in events!`);
+
+        this.client.events.set(event.name, event);
+        event.emitter[event.type](name, async (...args: any) => {
+          try {
+            await event.run(...args);
+          } catch (err: any) {
+            this.client.bulbutils.logError(
+              err,
+              undefined,
+              event.name ?? name ?? eventFile ?? "Unknown Event",
+              args
+            );
+          }
+        });
+      }
+      this.client.log.client(
+        "[CLIENT - EVENTS] Successfully registered all events"
+      );
+    });
+  }
+
+  async loadAbout(): Promise<void> {
+    cd(`${__dirname}/../../`);
+
+    this.client.about = {
+      buildId: exec(`git rev-list --all --count`, { silent: true }).stdout,
+      build: {
+        hash: exec(`git rev-parse --short HEAD`, { silent: true }).stdout,
+        time: exec(`git log -1 --format=%cd`, { silent: true }).stdout,
+      },
+    };
+  }
+}

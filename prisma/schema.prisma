@@ -10,22 +10,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model MUser {
+model User {
   id               String           @id @default(cuid())
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
   birthday         DateTime
-  discordId        String
+  discordId        String           @unique
   tag              String
   preferredName    String?
   guilds           UserGuildPivot[]
 }
 
-model MGuild {
+model Guild {
   id        String           @id @default(cuid())
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
-  discordId String
+  discordId String           @unique
   users     UserGuildPivot[]
 }
 
@@ -35,7 +35,11 @@ model UserGuildPivot {
   updatedAt DateTime @updatedAt
   enabled   Boolean  @default(false)
   userId    String
-  user      MUser    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   guildId   String
-  guild     MGuild   @relation(fields: [guildId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  guild     Guild   @relation(fields: [guildId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, guildId])
+  @@index([userId])
+  @@index([guildId])
 }

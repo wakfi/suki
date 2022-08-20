@@ -114,3 +114,4 @@ dist
 # SQLite3 database file
 *.db
 *.db-journal
+build/
