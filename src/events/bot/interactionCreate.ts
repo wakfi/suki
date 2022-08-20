@@ -1,7 +1,5 @@
 import Event from "../../structures/Event";
 import { Interaction } from "discord.js";
-import infraction from "../../interactions/select/infraction";
-import reminders from "../../interactions/select/reminders";
 import { developers } from "../../Config";
 import { bulbfetch } from "src/utils/BulbBotFetch";
 

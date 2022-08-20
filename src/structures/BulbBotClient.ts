@@ -17,7 +17,8 @@ import { logger } from "../utils/Logger";
 import BulbBotFetch from "../utils/BulbBotFetch";
 import ApplicationCommand from "./ApplicationCommand";
 
-export default class extends Client {
+// https://github.com/TeamBulbbot/bulbbot
+export default class BulbBotClient extends Client {
   public commands: Collection<string, ApplicationCommand>;
   public aliases: Collection<string, string>;
   public events: Collection<string, Event>;
