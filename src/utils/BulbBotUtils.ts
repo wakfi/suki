@@ -1,12 +1,9 @@
 import {
   CommandInteraction,
   ContextMenuInteraction,
-  GuildChannel,
   GuildMember,
   Interaction,
   Message,
-  MessageEmbed,
-  Snowflake,
   ThreadAutoArchiveDuration,
   ThreadChannel,
   User,
@@ -14,11 +11,7 @@ import {
 import moment, { Duration, Moment } from "moment";
 import BulbBotClient from "../structures/BulbBotClient";
 import { UserHandle } from "./types/UserHandle";
-import TranslateString from "./types/TranslateString";
-import { TranslateOptions, DeepAccess } from "./types/TranslateOptions";
-import { GuildFeaturesDescriptions } from "./types/GuildFeaturesDescriptions";
 import { isBaseGuildTextChannel } from "./typechecks";
-import prisma from "../prisma";
 
 export type UserObject = Pick<
   User & GuildMember,
@@ -247,77 +240,37 @@ export default class {
     switch (handle) {
       case UserHandle.CANNOT_ACTION_SELF:
         await interaction.reply({
-          content: await this.translate(
-            "global_cannot_action_self",
-            interaction.guild?.id,
-            {}
-          ),
+          content: "You cannot perform this action on yourself!",
           ephemeral: true,
         });
         return true;
 
       case UserHandle.CANNOT_ACTION_OWNER:
         await interaction.reply({
-          content: await this.translate(
-            "global_cannot_action_owner",
-            interaction.guild?.id,
-            {}
-          ),
-          ephemeral: true,
-        });
-        return true;
-
-      case UserHandle.CANNOT_ACTION_ROLE_EQUAL:
-        await interaction.reply({
-          content: await this.translate(
-            "global_cannot_action_role_equal",
-            interaction.guild?.id,
-            { target: user }
-          ),
+          content: "You cannot perform this action on the server owner!",
           ephemeral: true,
         });
         return true;
 
       case UserHandle.CANNOT_ACTION_BOT_SELF:
         await interaction.reply({
-          content: await this.translate(
-            "global_cannot_action_bot_self",
-            interaction.guild?.id,
-            {}
-          ),
+          content: "You cannot perform this action on the bot!",
           ephemeral: true,
         });
         return true;
 
+      case UserHandle.CANNOT_ACTION_ROLE_EQUAL:
       case UserHandle.CANNOT_ACTION_ROLE_HIGHER:
         await interaction.reply({
-          content: await this.translate(
-            "global_cannot_action_role_equal",
-            interaction.guild?.id,
-            { target: user }
-          ),
+          content: `You cannot perform this action on **${user.tag}** \`(${user.id})\` as you do not have a higher role than them!`,
           ephemeral: true,
         });
         return true;
 
       case UserHandle.CANNOT_ACTION_USER_ROLE_EQUAL_BOT:
-        await interaction.reply({
-          content: await this.translate(
-            "global_cannot_action_role_equal_bot",
-            interaction.guild?.id,
-            { target: user }
-          ),
-          ephemeral: true,
-        });
-        return true;
-
       case UserHandle.CANNOT_ACTION_USER_ROLE_HIGHER_BOT:
         await interaction.reply({
-          content: await this.translate(
-            "global_cannot_action_role_equal_bot",
-            interaction.guild?.id,
-            { target: user }
-          ),
+          content: `I cannot perform this action on **${user.tag}** \`(${user.id})\` as I don't have a higher role than them!`,
           ephemeral: true,
         });
         return true;
@@ -368,6 +321,7 @@ export default class {
     // if (typeof firstArray !== "object") return firstArray === secondArray;
     // @ts-expect-error
     if ("equals" in firstArray && typeof firstArray.equals === "function")
+      // @ts-expect-error
       return firstArray.equals(secondArray);
     if (firstArray.length !== secondArray.length) return false;
     const len = firstArray.length;

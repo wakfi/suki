@@ -3,6 +3,7 @@ import { Interaction } from "discord.js";
 import infraction from "../../interactions/select/infraction";
 import reminders from "../../interactions/select/reminders";
 import { developers } from "../../Config";
+import { bulbfetch } from "src/utils/BulbBotFetch";
 
 export default class extends Event {
   constructor(...args: any[]) {
@@ -40,7 +41,7 @@ export default class extends Event {
     } else if (interaction.isCommand()) {
       const guild =
         interaction.guild ||
-        (await this.client.bulbfetch.getGuild(interaction.guildId));
+        (await bulbfetch(this.client.guilds, interaction.guildId));
       if (!guild) {
         // Shouldn't be possible, or API error. Would mean command was sent in guild that doesn't exist (or API error)
         return;
