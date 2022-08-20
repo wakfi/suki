@@ -16,7 +16,7 @@ model User {
   updatedAt        DateTime         @updatedAt
   birthday         DateTime
   discordId        String           @unique
-  tag              String
+  tag              String           @unique
   preferredName    String?
   guilds           UserGuildPivot[]
 }

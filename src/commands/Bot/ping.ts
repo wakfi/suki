@@ -31,23 +31,10 @@ export default class Ping extends ApplicationCommand {
     const embed: MessageEmbed = new MessageEmbed()
       .setColor(Config.embedColor)
       .setDescription(
-        await this.client.bulbutils.translate(
-          "ping_latency",
-          interaction.guild?.id,
-          {
-            latency_bot: latency,
-            latency_ws: apiLatency,
-          }
-        )
+        `Bot latency is **${latency}ms**\nWebSocket latency is **${apiLatency}ms**`
       )
       .setFooter({
-        text: await this.client.bulbutils.translate(
-          "global_executed_by",
-          interaction.guild?.id,
-          {
-            user: interaction.user,
-          }
-        ),
+        text: `Executed by ${interaction.user.tag}`,
         iconURL: interaction.user.avatarURL({ dynamic: true }) || "",
       })
       .setTimestamp();

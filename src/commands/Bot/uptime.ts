@@ -1,9 +1,13 @@
 import { CommandInteraction, MessageEmbed } from "discord.js";
-import moment, { Duration } from "moment";
 import * as Config from "../../Config";
 import BulbBotClient from "../../structures/BulbBotClient";
 import ApplicationCommand from "../../structures/ApplicationCommand";
 import { ApplicationCommandType } from "discord-api-types/v9";
+
+const FSECS = 1000;
+const FMINS = FSECS * 60;
+const FHOURS = FMINS * 60;
+const FDAYS = FHOURS * 24;
 
 export default class Uptime extends ApplicationCommand {
   constructor(client: BulbBotClient, name: string) {
@@ -16,39 +20,24 @@ export default class Uptime extends ApplicationCommand {
   }
 
   public async run(interaction: CommandInteraction): Promise<void> {
-    const time: Duration = moment.duration(this.client.uptime, "milliseconds");
-    const days: number = Math.floor(time.asDays());
-    const hours: number = Math.floor(time.asHours() - days * 24);
-    const mins: number = Math.floor(
-      time.asMinutes() - days * 24 * 60 - hours * 60
-    );
-    const secs: number = Math.floor(
-      time.asSeconds() - days * 24 * 60 * 60 - hours * 60 * 60 - mins * 60
-    );
+    if (!this.client.uptime) return;
+    const time = this.client.uptime;
+    const days: number = ~~(time / FDAYS);
+    const hours: number = ~~(time / FHOURS - days * (FDAYS / FHOURS));
+    const mins: number = ~~(time / FMINS - hours * (FHOURS / FMINS));
+    const secs: number = ~~(time / FSECS - mins * (FMINS / FSECS));
 
     let uptime = "";
-    if (days > 0) uptime += `${days} day(s), `;
-    if (hours > 0) uptime += `${hours} hour(s), `;
-    if (mins > 0) uptime += `${mins} minute(s), `;
-    if (secs > 0) uptime += `${secs} second(s)`;
+    if (days > 0) uptime += `${days} day${days !== 1 ? "s" : ""}, `;
+    if (hours > 0) uptime += `${hours} hour${hours !== 1 ? "s" : ""}, `;
+    if (mins > 0) uptime += `${mins} minute${mins !== 1 ? "s" : ""}, `;
+    if (secs > 0) uptime += `${secs} second${secs !== 1 ? "s" : ""}`;
 
     const embed = new MessageEmbed()
       .setColor(Config.embedColor)
-      .setDescription(
-        await this.client.bulbutils.translate(
-          "uptime_uptime",
-          interaction.guild?.id,
-          { uptime }
-        )
-      )
+      .setDescription(`The current uptime is **${uptime}**`)
       .setFooter({
-        text: await this.client.bulbutils.translate(
-          "global_executed_by",
-          interaction.guild?.id,
-          {
-            user: interaction.user,
-          }
-        ),
+        text: `Executed by ${interaction.user.tag}`,
         iconURL: interaction.user.avatarURL({ dynamic: true }) || "",
       })
       .setTimestamp();

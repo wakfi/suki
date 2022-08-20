@@ -3,8 +3,6 @@ import { cd, exec } from "shelljs";
 import BulbBotClient from "./BulbBotClient";
 import { promisify } from "util";
 import glob from "glob";
-import Event from "./Event";
-import EventException from "./exceptions/EventException";
 
 const globAsync = promisify(glob);
 
@@ -17,36 +15,6 @@ export default class {
 
   get directory(): string {
     return `${dirname(require.main?.filename || ".")}${sep}`;
-  }
-
-  async loadEvents(): Promise<void> {
-    this.client.log.client("[CLIENT - EVENTS] Started registering events...");
-    const total = await loadAndConstruct<Event>({
-      client: this.client,
-      pathspec: `${this.directory}events/**/*.js`,
-      test: (event) => isClass(event) && event instanceof Event,
-      onLoad: (event, data) => {
-        this.client.events.set(event.name, event);
-        event.emitter[event.type](name, async (...args: any) => {
-          try {
-            await event.run(...args);
-          } catch (err: any) {
-            this.client.bulbutils.logError(
-              err,
-              undefined,
-              event.name ?? data.name ?? data.filePath ?? "Unknown Event",
-              args
-            );
-          }
-        });
-      },
-      onError: (type, instance) => {
-        throw new EventException(errMessages[type](instance.name, "events"));
-      },
-    });
-    this.client.log.client(
-      `[CLIENT - EVENTS] Successfully registered all ${total} events`
-    );
   }
 
   async loadAbout(): Promise<void> {
@@ -75,8 +43,8 @@ export default class {
         ? (item) => item instanceof ParentClass
         : undefined,
       onLoad: (item) => this.client[dirname].set(item.name, item),
-      onError: (type, item) => {
-        throw new Error(errMessages[type](item.name, dirname));
+      onError: (item) => {
+        throw new Error(`File "${item.name}" doesn't belong in ${dirname}!`);
       },
     });
     this.client.log.client(
@@ -93,18 +61,6 @@ export default class {
   }
 }
 
-enum FileLoadExceptionType {
-  DEFAULT_EXPORT_NOT_CLASS,
-  TEST_FAILED,
-}
-
-const errMessages = {
-  [FileLoadExceptionType.DEFAULT_EXPORT_NOT_CLASS]: (name: string) =>
-    `${name} is not a Class`,
-  [FileLoadExceptionType.TEST_FAILED]: (name: string, location: string) =>
-    `File "${name}" doesn't belong in ${location}!`,
-};
-
 interface LoadDirectoryParams<V = LoadableClass> {
   client: BulbBotClient;
   pathspec: string;
@@ -115,7 +71,7 @@ interface LoadDirectoryParams<V = LoadableClass> {
    */
   test?: (instance: V) => boolean;
   onLoad?: (instance: V, data: { name: string; filePath: string }) => any;
-  onError?: (type: FileLoadExceptionType, value: V, filePath: string) => any;
+  onError?: (value: V, filePath: string) => any;
 }
 
 // Object is the base prototype of everything
@@ -150,7 +106,7 @@ export async function loadAndConstruct<V = LoadableClass>({
       ? new LoadedFile.default(client, name)
       : LoadedFile.default;
     if (!test(instance)) {
-      await onError(FileLoadExceptionType.TEST_FAILED, instance, filePath);
+      await onError(instance, filePath);
       continue;
     }
 

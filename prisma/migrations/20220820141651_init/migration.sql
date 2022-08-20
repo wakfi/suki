@@ -33,6 +33,9 @@ CREATE TABLE "UserGuildPivot" (
 CREATE UNIQUE INDEX "User_discordId_key" ON "User"("discordId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_tag_key" ON "User"("tag");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Guild_discordId_key" ON "Guild"("discordId");
 
 -- CreateIndex

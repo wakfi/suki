@@ -15,6 +15,23 @@ export default class Event {
       (typeof options.emitter === "string"
         ? this.client[options.emitter]
         : options.emitter) || this.client;
+
+    Event.bootstrap(this);
+  }
+
+  private static bootstrap(event: Event) {
+    event.emitter[event.type](name, async (...args: any) => {
+      try {
+        await event.run(...args);
+      } catch (err: any) {
+        event.client.bulbutils.logError(
+          err,
+          undefined,
+          event.name ?? event.constructor.name ?? "Unknown Event",
+          args
+        );
+      }
+    });
   }
 
   public async run(..._: any) {

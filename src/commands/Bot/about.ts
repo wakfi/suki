@@ -6,10 +6,9 @@ import {
 } from "discord.js";
 import { botInvite, embedColor, supportInvite } from "../../Config";
 import BulbBotClient from "../../structures/BulbBotClient";
-import * as Emotes from "../../emotes.json";
-import { NonDigits } from "../../utils/Regex";
 import ApplicationCommand from "../../structures/ApplicationCommand";
 import { ApplicationCommandType } from "discord-api-types/v9";
+import * as packageJson from "package.json";
 
 export default class About extends ApplicationCommand {
   constructor(client: BulbBotClient, name: string) {
@@ -34,60 +33,44 @@ export default class About extends ApplicationCommand {
       new MessageButton()
         .setLabel("Invite")
         .setStyle("LINK")
-        .setEmoji(Emotes.other.DISCORD.replace(NonDigits, ""))
+        .setEmoji("🔗")
         .setURL(botInvite),
       new MessageButton()
         .setLabel("Support")
         .setStyle("LINK")
-        .setEmoji(Emotes.other.SUPPORT.replace(NonDigits, ""))
+        .setEmoji("❤️")
         .setURL(supportInvite),
-      new MessageButton()
-        .setLabel("Patreon")
-        .setStyle("LINK")
-        .setEmoji(Emotes.other.PATREON.replace(NonDigits, ""))
-        .setURL("https://www.patreon.com/bulbbot"),
       new MessageButton()
         .setLabel("Source Code")
         .setStyle("LINK")
-        .setEmoji(Emotes.other.GITHUB.replace(NonDigits, ""))
-        .setURL("https://github.com/TeamBulbbot/bulbbot"),
+        .setEmoji("💾")
+        .setURL("https://github.com/wakfi/suki"),
     ]);
 
-    const version = Number(this.client.about.buildId.replace("\n", "")) - 782;
+    let desc = [
+      `**__Suki Information__**`,
+      `**Version:** TS ${packageJson.version}`,
+      "",
+      "**Last Commit:**",
+      `**Hash:** \`${this.client.about.build.hash}\`**Time:** ${realCommitTime}`,
+      "",
+      `**Ping:** \`${latency} ms\``,
+      `**API Latency:** \`${apiLatency} ms\``,
+      "",
 
-    let desc = `**__Bulbbot Information__**\n`;
-    desc += `**Version:** TS ${(
-      Math.floor(version / 100) +
-      1 +
-      "" +
-      version
-    ).replace(
-      /\B(?=(\d)+(?!\d))/g,
-      "."
-    )} (${this.client.about.build.hash.replace("\n", "")})\n\n`;
-    desc += `**Last Commit:**\n**Hash:** \`${this.client.about.build.hash}\`**Time:** ${realCommitTime}\n\n`;
-    desc += `**Ping:** \`${latency} ms\`\n**API Latency:** \`${apiLatency} ms\`\n\n`;
-    desc +=
-      (await this.client.bulbutils.translate(
-        "uptime_uptime",
-        interaction.guild?.id,
-        {
-          uptime: this.client.bulbutils.getUptime(this.client.uptime),
-        }
-      )) + "\n\n";
-    desc += `**Supporters**\n`;
+      `The current uptime is **${this.client.bulbutils.getUptime(
+        this.client.uptime
+      )}**`,
+      "",
+      `**Supporters**`,
+      "",
+    ].join("\n");
 
     const embed: MessageEmbed = new MessageEmbed()
       .setColor(embedColor)
       .setDescription(desc)
       .setFooter({
-        text: await this.client.bulbutils.translate(
-          "global_executed_by",
-          interaction.guild?.id,
-          {
-            user: interaction.user,
-          }
-        ),
+        text: `Executed by ${interaction.user.tag}`,
         iconURL: interaction.user.avatarURL({ dynamic: true }) || "",
       })
       .setTimestamp();

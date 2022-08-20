@@ -92,8 +92,8 @@ export default class BulbBotClient extends Client {
 
   public async login(token = this.token): Promise<any> {
     await this.utils.loadAbout();
-    await this.utils.loadEvents();
     await this.utils.loadDirList({
+      events: Event,
       commands: ApplicationCommand,
       interactions: null,
     });

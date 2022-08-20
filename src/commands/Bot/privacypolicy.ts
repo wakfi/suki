@@ -18,20 +18,11 @@ export default class PrivacyPolicy extends ApplicationCommand {
     const embed: MessageEmbed = new MessageEmbed()
       .setColor(embedColor)
       .setDescription(
-        await this.client.bulbutils.translate(
-          "privacy_policy",
-          interaction.guild?.id,
-          {}
-        )
+        // TODO: Real privacy policy link
+        "📜 View the privacy policy of the bot **[here](https://wak.cx/)**"
       )
       .setFooter({
-        text: await this.client.bulbutils.translate(
-          "global_executed_by",
-          interaction.guild?.id,
-          {
-            user: interaction.user,
-          }
-        ),
+        text: `Executed by ${interaction.user.tag}`,
         iconURL: interaction.user.avatarURL({ dynamic: true }) || "",
       })
       .setTimestamp();
