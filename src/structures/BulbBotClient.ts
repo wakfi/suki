@@ -17,6 +17,7 @@ import Config from "../Config";
 import { logger } from "../utils/Logger";
 import BulbBotFetch from "../utils/BulbBotFetch";
 import ApplicationCommand from "./ApplicationCommand";
+import ApplicationSubCommand from "./ApplicationSubCommand";
 
 // https://github.com/TeamBulbbot/bulbbot
 export default class BulbBotClient extends Client {
@@ -94,7 +95,8 @@ export default class BulbBotClient extends Client {
     await this.utils.loadAbout();
     await this.utils.loadDirList({
       events: Event,
-      commands: ApplicationCommand,
+      // [ParentClass, ExcludeClass]
+      commands: [ApplicationCommand, ApplicationSubCommand],
       interactions: null,
     });
 

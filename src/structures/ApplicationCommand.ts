@@ -10,7 +10,9 @@ import {
   ApplicationCommandOptionType,
   ApplicationCommandType,
 } from "discord-api-types/v10";
-import ApplicationSubCommand from "./ApplicationSubCommand";
+import type ApplicationSubCommand from "./ApplicationSubCommand";
+import { loadAndConstruct } from "./Util";
+import { resolve } from "path";
 
 interface ApplicationCommandConstructOptions {
   name: string;
@@ -18,15 +20,12 @@ interface ApplicationCommandConstructOptions {
   description: string;
   dmPermission?: boolean;
   premium?: boolean;
-  subCommands?: ApplicationSubCommandClass[];
   clientPermissions?: PermissionString[];
   commandPermissions?: PermissionString[];
   options?: (APIApplicationCommandOption & Pick<any, any>)[] | null;
   devOnly?: boolean;
   ownerOnly?: boolean;
 }
-
-export type ApplicationSubCommandClass = typeof ApplicationSubCommand;
 
 export default class ApplicationCommand {
   public readonly client: BulbBotClient;
@@ -38,7 +37,7 @@ export default class ApplicationCommand {
   public readonly dmPermission: boolean;
   public readonly defaultMemberPermissions: string | null;
   public readonly premium: boolean;
-  public readonly subCommands: ApplicationSubCommand[];
+  public readonly subCommands: ApplicationSubCommand[] = [];
   public readonly commandPermissions: PermissionString[];
   public readonly clientPermissions: PermissionString[];
   public options: APIApplicationCommandOption[];
@@ -53,7 +52,6 @@ export default class ApplicationCommand {
       description,
       dmPermission = false,
       premium = false,
-      subCommands = [],
       clientPermissions = [],
       commandPermissions = [],
       options,
@@ -68,13 +66,28 @@ export default class ApplicationCommand {
     this.dmPermission = dmPermission;
     this.commandPermissions = commandPermissions;
     this.premium = premium;
-    this.subCommands = subCommands?.map((sc) => new sc(this.client, this));
     this.clientPermissions = clientPermissions;
     this.defaultMemberPermissions = this.computePermissions();
     // @ts-expect-error
     this.options = options;
     this.devOnly = devOnly;
     this.ownerOnly = ownerOnly;
+
+    const caller = _getCallerFile(2);
+    console.log("for:", this.constructor);
+    console.log("caller: ", caller);
+    console.log("resolved to: ", resolve(caller, ".."));
+    if (caller.endsWith("Util.js")) {
+      loadAndConstruct<ApplicationSubCommand>({
+        client,
+        pathspec: `${_getCallerFile().slice(0, -3)}/*.js`,
+        // @ts-expect-error item.parent is readonly. We are ignoring that
+        onLoad: (item) => (item.parent = this),
+        onError: (item) => {
+          throw new Error(`Error while loading subcommand "${item.name}"`);
+        },
+      }).then((loaded) => this.subCommands.push(...loaded));
+    }
   }
 
   public validateClientPermissions(interaction: CommandInteraction): string {
@@ -97,4 +110,41 @@ export default class ApplicationCommand {
   ): Promise<void> {
     throw new Error("Method not implemented.");
   }
+}
+
+type CallStack = Parameters<
+  NonNullable<typeof Error["prepareStackTrace"]>
+>["1"];
+
+// Some crazy dark magic
+// This function _MUST_ be defined in the file where it is used, it cannot be imported (just doesn't work)
+function _getCallerFile(depth = 1) {
+  const originalFunc = Error.prepareStackTrace!;
+
+  let callerfile: string = "";
+  try {
+    const err = new Error();
+    let currentfile: string;
+
+    Error.prepareStackTrace = function (err, stack) {
+      return stack;
+    };
+
+    currentfile = (err.stack as unknown as CallStack)?.shift()?.getFileName()!;
+
+    while (err.stack?.length) {
+      callerfile = (err.stack as unknown as CallStack)?.shift()?.getFileName()!;
+
+      if (currentfile !== callerfile) {
+        if (!--depth) {
+          break;
+        }
+        currentfile = callerfile;
+      }
+    }
+  } catch (e) {}
+
+  Error.prepareStackTrace = originalFunc;
+  console.log(callerfile);
+  return callerfile;
 }

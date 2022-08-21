@@ -1,5 +1,5 @@
 import type { APIChannel, APIGuildMember, APIRole } from "discord-api-types/v9";
-import { GuildMember, Role, GuildChannel } from "discord.js";
+import { GuildMember, Role, GuildChannel, User } from "discord.js";
 
 // Miscellaneous helper functions & idioms
 // So they don't need to be referenced from bulbutils
@@ -102,3 +102,9 @@ export const unpackSettled = <T>(settled: PromiseSettledResult<T>[]): T[] => {
   }
   return resolved;
 };
+
+export const resolveAvatarUrl = (user: User) =>
+  user.displayAvatarURL({ dynamic: true }) ||
+  `https://cdn.discordapp.com/embed/avatars/${
+    parseInt(user.discriminator, 10) % 5
+  }.png`;

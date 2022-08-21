@@ -23,6 +23,9 @@ export async function registerSlashCommands(client: BulbBotClient) {
 
     for (const command of client.commands.values()) {
       if (command.subCommands.length) {
+        if (!command.options) {
+          command.options = [];
+        }
         for (const subCommand of command.subCommands) {
           command.options.push({
             name: subCommand.name,

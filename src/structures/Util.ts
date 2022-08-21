@@ -3,6 +3,8 @@ import { cd, exec } from "shelljs";
 import BulbBotClient from "./BulbBotClient";
 import { promisify } from "util";
 import glob from "glob";
+import { unpackSettled } from "../utils/helpers";
+console.log(__dirname);
 
 const globAsync = promisify(glob);
 
@@ -31,16 +33,19 @@ export default class {
 
   async loadDir<C extends Constructable>(
     dirname: string,
-    ParentClass?: Nullable<C>
+    ParentClass?: Nullable<C>,
+    ExcludeClass?: Nullable<Constructable>
   ): Promise<void> {
     this.client.log.client(
       `[CLIENT - ${dirname.toUpperCase()}] Started registering ${dirname}...`
     );
-    const total = await loadAndConstruct<C>({
+    const results = await loadAndConstruct<C>({
       client: this.client,
       pathspec: `${this.directory}${dirname}/**/*.js`,
       test: isClass(ParentClass)
-        ? (item) => item instanceof ParentClass
+        ? (item) =>
+            item instanceof ParentClass &&
+            (ExcludeClass ? !(item instanceof ExcludeClass) : true)
         : undefined,
       onLoad: (item) => this.client[dirname].set(item.name, item),
       onError: (item) => {
@@ -48,15 +53,21 @@ export default class {
       },
     });
     this.client.log.client(
-      `[CLIENT - ${dirname.toUpperCase()}] Successfully registered all ${total} ${dirname}`
+      `[CLIENT - ${dirname.toUpperCase()}] Successfully registered all ${
+        results.length
+      } ${dirname}`
     );
   }
 
-  async loadDirList(dirs: string[] | Record<string, Maybe<Constructable>>) {
+  async loadDirList(
+    dirs: string[] | Record<string, Maybe<Constructable | Constructable[]>>
+  ) {
     return await Promise.all(
       Array.isArray(dirs)
         ? dirs.map((dirname) => this.loadDir(dirname))
-        : Object.entries(dirs).map((entry) => this.loadDir(...entry))
+        : Object.entries(dirs).map(([k, v]) =>
+            this.loadDir(k, ...(Array.isArray(v) ? v : [v]))
+          )
     );
   }
 }
@@ -80,12 +91,12 @@ interface LoadableClass extends Object {
   constructor: typeof LoadableClass;
 }
 declare var LoadableClass: {
-  new (...args: any): LoadableClass;
+  new (client: BulbBotClient, name: string): LoadableClass;
   prototype: LoadableClass;
 };
 
 /**
- * @returns Count of instances constructed successfully. This is effectively the number of times onLoad is called
+ * @returns Array of successfully imported values or constructed objects (if a class)
  */
 export async function loadAndConstruct<V = LoadableClass>({
   client,
@@ -94,27 +105,35 @@ export async function loadAndConstruct<V = LoadableClass>({
   test = () => true,
   onLoad = () => {},
   onError = () => {},
-}: LoadDirectoryParams<V>): Promise<number> {
-  const files = await globAsync(pathspec);
-  let count = 0;
-  for (const filePath of files) {
-    delete require.cache[filePath];
-    const { name } = parse(filePath);
-    const LoadedFile: { default: Constructable<V> } = await import(filePath);
+}: LoadDirectoryParams<V>): Promise<V[]> {
+  const files: string[] = await globAsync(pathspec);
+  console.log("files:", files);
+  const out: V[] =
+    // Perform file operations in parallel
+    await Promise.allSettled(
+      files.map(async (filePath) => {
+        delete require.cache[filePath];
+        const { name } = parse(filePath);
+        const LoadedFile: {
+          default: (Constructable<V> & LoadableClass) | V;
+        } = await import(filePath);
 
-    const instance = isClass(LoadedFile.default)
-      ? new LoadedFile.default(client, name)
-      : LoadedFile.default;
-    if (!test(instance)) {
-      await onError(instance, filePath);
-      continue;
-    }
+        const instance = isClass(LoadedFile.default)
+          ? new LoadedFile.default(client, name)
+          : LoadedFile.default;
+        if (!test(instance)) {
+          await onError(instance, filePath);
+          return undefined;
+        }
 
-    ++count;
-    onLoad(instance, { name, filePath });
-  }
+        onLoad(instance, { name, filePath });
+        return instance;
+      })
+    )
+      .then(unpackSettled)
+      .then((elems) => elems.filter(Boolean) as Awaited<V>[]);
 
-  return count;
+  return out;
 }
 
 function isClass(input: any): input is Constructable {
